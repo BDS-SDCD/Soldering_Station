@@ -1,0 +1,3 @@
+../Core/Src/Flash_Custom.c:12:9:Flash_Erase	2
+../Core/Src/Flash_Custom.c:42:10:Flash_Write	3
+../Core/Src/Flash_Custom.c:67:6:Flash_Read	2

@@ -1,0 +1,5 @@
+../Core/Src/Filter.c:3:10:Filter_Mediana_3	4
+../Core/Src/Filter.c:27:10:Filter_Mediana_9	1
+../Core/Src/Filter.c:34:6:Filter_ini	1
+../Core/Src/Filter.c:40:10:Filter_Exp_Mov_Average	1
+../Core/Src/Filter.c:46:10:Filter_Combined	3

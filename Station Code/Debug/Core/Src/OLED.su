@@ -1,0 +1,11 @@
+../Core/Src/OLED.c:108:6:OLED_Send_Comand	32	static
+../Core/Src/OLED.c:115:6:OLED_ON	16	static
+../Core/Src/OLED.c:120:6:OLED_Search_Adress	24	static
+../Core/Src/OLED.c:130:6:OLED_ini	16	static
+../Core/Src/OLED.c:162:6:OLED_Set_Cursor	16	static
+../Core/Src/OLED.c:170:6:OLED_Set_Char_Cursor	16	static
+../Core/Src/OLED.c:179:6:OLED_Clear_Display	32	static
+../Core/Src/OLED.c:187:6:OLED_Send_Char	40	static
+../Core/Src/OLED.c:198:6:OLED_Clear_Char	16	static
+../Core/Src/OLED.c:203:6:OLED_Clear_Line	24	static
+../Core/Src/OLED.c:208:6:OLED_Send_String	176	static

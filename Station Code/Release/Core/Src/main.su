@@ -1,0 +1,11 @@
+../Core/Src/main.c:85:6:HAL_ADC_ConvCpltCallback	8	static
+../Core/Src/main.c:95:6:HAL_GPIO_EXTI_Callback	16	static
+../Core/Src/main.c:102:6:Button_Handler	0	static
+../Core/Src/main.c:132:6:Incoder_Handler	0	static
+../Core/Src/main.c:172:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:196:6:BUTTON_INI	48	static
+../Core/Src/main.c:253:6:INCODER_INI	16	static
+../Core/Src/main.c:290:6:MENU_INI	24	static
+../Core/Src/main.c:427:6:SystemClock_Config	96	static,ignoring_inline_asm
+../Core/Src/main.c:307:5:main	104	static,ignoring_inline_asm
+../Core/Src/main.c:968:6:Error_Handler	0	static,ignoring_inline_asm
