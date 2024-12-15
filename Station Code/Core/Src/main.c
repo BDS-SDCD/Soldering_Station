@@ -55,7 +55,7 @@ TIM_HandleTypeDef htim4;
 struct OLED OLED1;
 struct Incoder Incoder_P2, Incoder_P1;
 struct Button_Vector Button_Vector;
-struct Button  Full_Power_Button;
+//struct Button  Full_Power_Button;
 struct Vibration_Sensor VS;
 struct Menu_List_Element_Vector Soldering_Iron_Menu_Vector, Soldering_Heat_Gun_Menu_Vector,Soldering_Separator_Menu_Vector;
 struct Menu_List_Vector Menu_List_Vector;
@@ -143,7 +143,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_14;
 	Button_ini.PIN=GPIO_PIN_8;
 	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_ID_E2B2;
@@ -151,7 +151,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_14;
 	Button_ini.PIN=GPIO_PIN_9;
 	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_ID_E2B3;
@@ -159,7 +159,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_14;
 	Button_ini.PIN=GPIO_PIN_10;
 	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_ID_E1B1;
@@ -167,7 +167,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_4;
 	Button_ini.GPIO=GPIOB;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_ID_E1B2;
@@ -175,7 +175,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_5;
 	Button_ini.GPIO=GPIOB;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_ID_E1B3;
@@ -183,7 +183,7 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_8;
 	Button_ini.GPIO=GPIOB;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
 	Button_ini.ID=Button_Gerkon_ID;
@@ -191,22 +191,9 @@ void BUTTON_INI(void){
 	Button_ini.EXTI_PIN=GPIO_PIN_2;
 	Button_ini.PIN=GPIO_PIN_2;
 	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular;
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	VS.EXTI_PIN=GPIO_PIN_5;
-	VS.GPIO=GPIOA;
-	VS.State=3;
-	VS.Prew_State=4;
-
-	Button_ini.ID=Full_Power_Button_ID;
-	Button_ini.count_max=2;
-	Button_ini.EXTI_PIN=GPIO_PIN_4;
-	Button_ini.PIN=GPIO_PIN_4;
-	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular;
-
-	Full_Power_Button=Button_ini;
 
 }
 //---------------------------------------------------------------------------------
@@ -407,8 +394,18 @@ void Soldering_Iron_INI(uint8_t Flash_Read_Status){
 	Soldering_Iron.Filter.mass=&ADC_Data[4];
 
 	Soldering_Iron.PWM_htim=&htim2;
-	Soldering_Iron.Full_Power_Button=&Full_Power_Button;
-	Soldering_Iron.VS=&VS;
+
+	Soldering_Iron.Full_Power_Button.ID=Full_Power_Button_ID;
+	Soldering_Iron.Full_Power_Button.count_max=2;
+	Soldering_Iron.Full_Power_Button.EXTI_PIN=GPIO_PIN_4;
+	Soldering_Iron.Full_Power_Button.PIN=GPIO_PIN_4;
+	Soldering_Iron.Full_Power_Button.GPIO=GPIOA;
+	Soldering_Iron.Full_Power_Button.MODE=Button_Mode_Regular_Without_EXTI;
+
+	Soldering_Iron.VS.EXTI_PIN=GPIO_PIN_5;
+	Soldering_Iron.VS.GPIO=GPIOA;
+	Soldering_Iron.VS.State=3;
+	Soldering_Iron.VS.Prew_State=4;
 
 	Soldering_Iron.MODE=MANUAL;
 
@@ -489,16 +486,16 @@ void Soldering_Heat_Gun_INI(uint8_t Flash_Read_Status){
 }
 //----------------------------------------------------------------------------
 void Soldering_Separator_INI(uint8_t Flash_Read_Status){
-	Soldering_Separator.PID.KP=0.2;
-	Soldering_Separator.PID.KI=0.01;//0.03;//0.03
-	Soldering_Separator.PID.KD=0.4;//1.5;
+	Soldering_Separator.PID.KP=0.15;
+	Soldering_Separator.PID.KI=0.0005;//0.03;//0.03
+	Soldering_Separator.PID.KD=0.1;//1.5;
 	Soldering_Separator.PID.dt=0.1;
 	Soldering_Separator.PID.MAX_Control=350;
 
 
 	Soldering_Separator.Filter.Filter_Mode=Three_Samples;
-	Soldering_Separator.Filter.k_min=0.03;
-	Soldering_Separator.Filter.k_max=0.8;
+	Soldering_Separator.Filter.k_min=0.1;
+	Soldering_Separator.Filter.k_max=0.3;
 	Soldering_Separator.Filter.Val_Delata=60;
 	Soldering_Separator.Filter.mass=&ADC_Data[13];
 
@@ -592,7 +589,7 @@ int main(void)
 
 
 
-  Button_ini(&Full_Power_Button);
+
 
   //---------------------------------------------------------------------------------TIM
 	__HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);

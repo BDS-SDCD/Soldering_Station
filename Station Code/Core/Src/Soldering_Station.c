@@ -35,7 +35,7 @@ void Solder_Iron_it(struct Soldering_Iron *self){
 	 * PID and Filter iteration for Soldering_Iron
 	 */
 	Vibration_Sensor_it(self);			// We can read state of Vibration Sensor only when PWM is stopped
-	Button_it(self->Full_Power_Button); // We can read state of button only when PWM is stopped
+	Button_it(&self->Full_Power_Button); // We can read state of button only when PWM is stopped
 	if(self->State==1){
 	  HAL_TIM_PWM_Start(self->PWM_htim, TIM_CHANNEL_4);
 	  PID_Set_Point_Now(&self->PID,(int)(self->Temperature=Filter_Combined(&self->Filter))); //PID it
@@ -59,11 +59,6 @@ void Solder_Iron_tim_it(struct Soldering_Iron *self){
 	static uint8_t Button_prescaler=0;
 	static uint8_t TIM_prescaler=0;
 
-	if(Button_prescaler++==20){
-		Button_EXTI(self->Full_Power_Button,&self->Full_Power_Button->PIN);
-		Button_prescaler=0;
-	}
-
 	if(TIM_prescaler++==10){
 		if(self->State){
 			if(self->Timer++==self->Sleep_time){						//if Time more than Sleep time value set sleep mode
@@ -83,6 +78,7 @@ void Solder_Iron_ini(struct Soldering_Iron *self){
 	 */
 	PID_ini(&self->PID);
 	Filter_ini(&self->Filter);
+	Button_ini(&self->Full_Power_Button);
 	Flash_Rewrite_Timer_ini(&self->Flash_Rewrite_Timer);
 }
 
@@ -125,12 +121,12 @@ void Vibration_Sensor_it(struct Soldering_Iron *self){
 	 * Vibration sensor have not any check
 	 * Main function reset Sleep timer when rising / falling edge
 	 */
-	self->VS->State=HAL_GPIO_ReadPin(self->VS->GPIO,self->VS->EXTI_PIN);					//Read Pin State
-		if(self->VS->State!=self->VS->Prew_State){											//IF ReadState!=Prew_Stae
+	self->VS.State=HAL_GPIO_ReadPin(self->VS.GPIO,self->VS.EXTI_PIN);					//Read Pin State
+		if(self->VS.State!=self->VS.Prew_State){											//IF ReadState!=Prew_Stae
 			Solder_Iron_Sleep_Time_Resset(self);											//Sleep Timer Reset and current MODE(sleep) set previous mode(Manual/Preset1/Preset2)
 			Solder_Iron_Set_Temperature(self,self->MODE);												//Set previous mode temperature before sleep mode temperature;
 		}
-		self->VS->Prew_State=self->VS->State;												//Prew State = Read State
+		self->VS.Prew_State=self->VS.State;												//Prew State = Read State
 }
 //---------------------------------------------------------------------------------				// Solder_Iron Flash
 uint32_t Solder_Iron_Flash_Write_Struct(struct Soldering_Iron *self,uint32_t addr){

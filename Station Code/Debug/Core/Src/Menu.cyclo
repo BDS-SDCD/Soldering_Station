@@ -17,5 +17,5 @@
 ../Core/Src/Menu.c:335:6:Menu_List_Vector_it	6
 ../Core/Src/Menu.c:379:6:Menu_List_Create	3
 ../Core/Src/Menu.c:403:6:start_Page_Drow	1
-../Core/Src/Menu.c:434:6:Button_Handler	21
+../Core/Src/Menu.c:434:6:Button_Handler	20
 ../Core/Src/Menu.c:491:6:Menu_it	16

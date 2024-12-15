@@ -474,7 +474,7 @@ void Button_Handler(struct Button* self){
 
 			break;
 		case Full_Power_Button_ID:
-			if((self->Previos_Stable_State!=self->State)&&(Soldering_Iron.State==1)){
+			if(Soldering_Iron.State==1){
 				if(self->State==GPIO_PIN_RESET){
 					Soldering_Iron.Full_Power_State=1;
 				}else{

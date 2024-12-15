@@ -32,7 +32,13 @@ struct Button{
 	uint16_t EXTI_PIN;
 	uint16_t PIN;
 	GPIO_TypeDef *GPIO;
-	uint8_t MODE;
+
+	enum {
+		Button_Mode_Regular_With_EXTI,
+		Button_Mode_Regular_Without_EXTI,
+		Button_Mode_Incoder
+
+	}MODE;
 
 	struct Incoder *base;
 };

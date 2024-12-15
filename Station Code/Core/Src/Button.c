@@ -36,7 +36,7 @@ void Incoder_EXTI(struct Incoder *self, uint16_t* GPIO){
 void Button_MODE_it(struct Button* self){
 	switch (self->MODE){
 
-		case Button_Mode_Regular:
+		case Button_Mode_Regular_With_EXTI:
 			if(self->PIN_State==HAL_GPIO_ReadPin(self->GPIO,self->PIN)){
 				self->State=self->PIN_State;
 				Button_Handler(self);
@@ -44,6 +44,19 @@ void Button_MODE_it(struct Button* self){
 			}
 			self->count=0;
 			self->Flag=0;
+		break;
+
+		case Button_Mode_Regular_Without_EXTI:
+			if(self->PIN_State==HAL_GPIO_ReadPin(self->GPIO,self->PIN)){
+				self->Stable_State=self->PIN_State;
+				if(self->Stable_State!=self->Previos_Stable_State){
+					self->State=self->PIN_State;
+					Button_Handler(self);
+				}
+				self->Previos_Stable_State=self->Stable_State;
+			}
+			self->count=0;
+
 		break;
 
 		case Button_Mode_Incoder:
@@ -89,10 +102,13 @@ void Incoder_it(struct Incoder *self){
 //---------------------------------------------------------------------------------
 void Button_ini(struct Button* self){
 	self->count=0;
-	self->Flag=0;
 	self->Presed_counter=0;
 	self->Previos_Stable_State=1;
 	self->event=0;
+	if(self->MODE==Button_Mode_Regular_Without_EXTI)
+		self->Flag=1;
+	else
+		self->Flag=0;
 }
 //---------------------------------------------------------------------------------
 void Button_Vector_Create(struct Button_Vector *Vector, struct Button *Button){

@@ -79,8 +79,8 @@ struct Soldering_Iron {
 	struct Temperature_Pressets Temperature_Pressets;
 	struct Temperature_Corection Temperature_Corection;
 
-	struct Vibration_Sensor *VS;
-	struct Button *Full_Power_Button;
+	struct Vibration_Sensor VS;
+	struct Button Full_Power_Button;
 	TIM_HandleTypeDef *PWM_htim;
 
 	uint16_t Add_Temperature;
