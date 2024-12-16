@@ -46,12 +46,11 @@ struct Menu_List_Vector{
 
 };
 //----------------------------------------------------------------------------
-void Menu_List_Element_Vector_it(struct Menu_List_Element_Vector *self);
-//void Menu_List_Element_Create(struct Menu_List_Element_Vector *self, char *str, enum Type mode, uint8_t step, void *value);
+void Menu_List_Element_Vector_it(struct Menu_List_Element_Vector *self, struct Incoder *Incoder);
 void Menu_List_Element_Create(struct Menu_List_Element_Vector *head,struct Menu_List_Element_Vector *ini_element);
 void Menu_List_Create(struct Menu_List_Vector *List_Vector,struct Menu_List_Element_Vector *List_Element_Vector, char *str);
-void Menu_List_Vector_it(struct Menu_List_Vector *self);
-void Menu_it(struct Menu_List_Vector *self);
+void Menu_List_Vector_it(struct Menu_List_Vector *self, struct Incoder *Incoder);
+void Menu_it(struct Menu_List_Vector *self, struct Incoder *Incoder_P1, struct Incoder *Incoder_P2);
 //----------------------------------------------------------------------------
 
 

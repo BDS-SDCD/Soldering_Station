@@ -13,11 +13,11 @@
 //---------------------------------------------------------------------------------
 struct Button{
 	uint8_t ID;
-	uint8_t PIN_State:1;
+	GPIO_PinState PIN_State:1;
 
-	uint8_t Previos_State:1;
-	uint8_t Stable_State:1;
-	uint8_t Previos_Stable_State:1;
+	GPIO_PinState Previos_State:1;
+	GPIO_PinState Stable_State:1;
+	GPIO_PinState Previos_Stable_State:1;
 
 	uint8_t Presed_counter;
 	uint8_t Presed_counter_max;
@@ -51,8 +51,13 @@ struct Button_Vector{
 
 struct Rotary_Switch{
 	uint8_t ID;
-	uint8_t State:1;
+	GPIO_PinState State:1;
 	uint8_t event:1;
+
+	enum{
+		Direct,					//direct
+		Reverse					//reverse
+	}Rotary_Switch_Direcion;
 
 	uint16_t EXTI_PIN;
 	uint16_t PIN;
@@ -62,10 +67,19 @@ struct Rotary_Switch{
 
 };
 //---------------------------------------------------------------------------------
+enum Incoder_Button_State{
+	Incoder_Button_NotPressed=0,
+	Incoder_Button_Short=2,
+	Incoder_Button_long=3
+};
+//---------------------------------------------------------------------------------
 struct Incoder{
 	uint8_t ID;
 	struct Button Button;
 	struct Rotary_Switch Rotary_Switch;
+	int Incoder_Rotary_Switch_Buffer;
+	enum Incoder_Button_State Incoder_Button_State;
+
 };
 //---------------------------------------------------------------------------------
 #define Button_Mode_Regular 1
@@ -89,6 +103,10 @@ void Incoder_ini(struct Incoder *self);
 void Incoder_EXTI(struct Incoder *self, uint16_t* GPIO);
 void Incoder_it(struct Incoder *self);
 void Incoder_Handler(struct Incoder *self);
+void Incoder_Reset_Rotary_Switch_Buffer(struct Incoder *self);
+int Incoder_Get_Rotary_Switch_Buffer(struct Incoder *self);
+void Incoder_Reset_Button_State(struct Incoder *self);
+enum Incoder_Button_State Incoder_Get_Button_State(struct Incoder *self);
 
 void Rotary_Switch_EXTI(struct Rotary_Switch *self, uint16_t* GPIO);
 void Rotary_Switch_Handler(struct Rotary_Switch *self);
@@ -97,6 +115,7 @@ void Button_ini(struct Button* self);
 void Button_EXTI(struct Button* self,uint16_t* GPIO);
 void Button_it(struct Button* self);
 void Button_Handler(struct Button* self);
+GPIO_PinState Button_Get_Pin_State(struct Button* self);
 
 
 void Button_Vector_Create(struct Button_Vector *Vector, struct Button *Button);

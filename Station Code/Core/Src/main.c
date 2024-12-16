@@ -210,6 +210,7 @@ void INCODER_INI(void){
 	Incoder_P2.Rotary_Switch.EXTI_PIN=GPIO_PIN_12;
 	Incoder_P2.Rotary_Switch.PIN=GPIO_PIN_13;
 	Incoder_P2.Rotary_Switch.GPIO=GPIOB;
+	Incoder_P2.Rotary_Switch.Rotary_Switch_Direcion=Reverse;
 
 	Incoder_ini(&Incoder_P2);
 
@@ -226,6 +227,7 @@ void INCODER_INI(void){
 	Incoder_P1.Rotary_Switch.EXTI_PIN=GPIO_PIN_15;
 	Incoder_P1.Rotary_Switch.PIN=GPIO_PIN_11;
 	Incoder_P1.Rotary_Switch.GPIO=GPIOA;
+	Incoder_P1.Rotary_Switch.Rotary_Switch_Direcion=Direct;
 
 	Incoder_ini(&Incoder_P1);
 
@@ -615,7 +617,7 @@ int main(void)
 	  HAL_Delay(100);
 
 
-	  Menu_it(&Menu_List_Vector);
+	  Menu_it(&Menu_List_Vector, &Incoder_P1, &Incoder_P2);
 
     /* USER CODE END WHILE */
 

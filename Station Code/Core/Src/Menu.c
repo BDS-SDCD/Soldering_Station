@@ -6,67 +6,12 @@
  */
 #include "Menu.h"
 
-int Incoder_P2_Count;
-int Incoder_P1_Count;
-uint8_t count1=0;
+
 extern struct Soldering_Iron Soldering_Iron;
 extern struct Soldering_Heat_Gun Soldering_Heat_Gun;
 extern struct Soldering_Separator Soldering_Separator;
 extern struct ZCD ZCD;
 
-extern struct test_struct test_struct_read, test_struct_write;
-
-
-enum Incoder_Button_State{
-	Incoder_Button_NotPressed=0,
-	Incoder_Button_Short=2,
-	Incoder_Button_long=3
-}Incoder_Button_State_P2,Incoder_Button_State_P1;
-
-enum {
-	Interface_Contoll_Soldering_Heat_Gun,
-	Interface_Contoll_Soldering_Separator
-}Interface_Contoll;
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-void Incoder_Handler(struct Incoder *self){
-	switch(self->ID){
-		case Incoder_ID_P1:
-			if(self->Rotary_Switch.event){
-				if(self->Rotary_Switch.State){
-					Incoder_P1_Count++;
-				}
-				else{
-					Incoder_P1_Count--;
-				}
-			}else if(self->Button.event){
-				if(self->Button.State==1){
-					Incoder_Button_State_P1=Incoder_Button_Short;
-				}else{
-					Incoder_Button_State_P1=Incoder_Button_long;
-				}
-
-			}
-		break;
-		case Incoder_ID_P2:
-			if(self->Rotary_Switch.event){
-				if(self->Rotary_Switch.State){
-					Incoder_P2_Count--;
-				}
-				else{
-					Incoder_P2_Count++;
-				}
-			}else if(self->Button.event){
-				if(self->Button.State==1){
-					Incoder_Button_State_P2=Incoder_Button_Short;
-				}else{
-					Incoder_Button_State_P2=Incoder_Button_long;
-				}
-			}
-		break;
-
-	}
-
-}
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 void Menu_Parmetr_Drow(void *num_void, uint8_t x,uint8_t y,enum Type mode){
 	switch(mode){
@@ -183,61 +128,65 @@ void OLED_Set_Menu_Cursor(struct OLED *self, uint8_t x, uint8_t y,uint8_t Ress){
 	}
 }
 
-void Value_Changing(void *parametr, uint8_t step, enum Type mode, uint16_t min, uint16_t max, int *Incoder_counter){
+void Value_Changing(void *parametr, uint8_t step, enum Type mode, uint16_t min, uint16_t max, struct Incoder *Incoder){
 	switch(mode){
 		case INT:
-			*(int*)parametr+=(*Incoder_counter)*step;
+			*(int*)parametr+=Incoder_Get_Rotary_Switch_Buffer(Incoder)*step;
 		break;
 		case UINT8:
-			if((*(uint8_t*)parametr+(*Incoder_counter)*step)<min)
+			if((*(uint8_t*)parametr+Incoder_Get_Rotary_Switch_Buffer(Incoder)*step)<min)
 				*(uint8_t*)parametr=(uint8_t)min;
-			else if ((*(uint8_t*)parametr+(*Incoder_counter)*step)>max)
+			else if ((*(uint8_t*)parametr+Incoder_Get_Rotary_Switch_Buffer(Incoder)*step)>max)
 				*(uint8_t*)parametr=(uint8_t)max;
 			else
-				*(uint8_t*)parametr+=(uint8_t)(*Incoder_counter)*step;
+				*(uint8_t*)parametr+=(uint8_t)Incoder_Get_Rotary_Switch_Buffer(Incoder)*step;
 		break;
 		case UINT16:
-			if((*(uint16_t*)parametr+(*Incoder_counter)*step)<min)
+			if((*(uint16_t*)parametr+Incoder_Get_Rotary_Switch_Buffer(Incoder)*step)<min)
 				*(uint16_t*)parametr=(uint16_t)min;
-			else if ((*(uint16_t*)parametr+(*Incoder_counter)*step)>max)
+			else if ((*(uint16_t*)parametr+Incoder_Get_Rotary_Switch_Buffer(Incoder)*step)>max)
 				*(uint16_t*)parametr=(uint16_t)max;
 			else
-				*(uint16_t*)parametr+=(uint16_t)(*Incoder_counter)*step;
+				*(uint16_t*)parametr+=(uint16_t)Incoder_Get_Rotary_Switch_Buffer(Incoder)*step;
 		break;
 		case BOOL:
-			if(*Incoder_counter>0)
+			if(Incoder_Get_Rotary_Switch_Buffer(Incoder)>0)
 				*(uint8_t*)parametr=1;
-			else if(*Incoder_counter<0)
+			else if(Incoder_Get_Rotary_Switch_Buffer(Incoder)<0)
 				*(uint8_t*)parametr=0;
 		break;
 	}
-	*Incoder_counter=0;
+	Incoder_Reset_Rotary_Switch_Buffer(Incoder);
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-void Value_Change(void *parametr, uint8_t x, uint8_t y, uint8_t step, enum Type mode, uint16_t min, uint16_t max, int *Incoder_counter){
+void Value_Change(void *parametr, uint8_t x, uint8_t y, uint8_t step, enum Type mode, uint16_t min, uint16_t max, struct Incoder *Incoder){
 
-	Value_Changing(parametr, step, mode,  min, max, Incoder_counter);
+	Value_Changing(parametr, step, mode,  min, max, Incoder);
 	Menu_Parmetr_Drow(parametr, x, y,mode);
 }
-void Menu_List_Element_Value_Change(struct Menu_List_Element_Vector *self, uint8_t y){
-	Incoder_Button_State_P2=Incoder_Button_NotPressed;
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+void Menu_List_Element_Value_Change(struct Menu_List_Element_Vector *self, uint8_t y, struct Incoder *Incoder){
+	Incoder_Reset_Button_State(Incoder);
 	OLED_Set_Menu_Cursor(&OLED1,15, y,0);
-	while(Incoder_Button_State_P2!=Incoder_Button_long){
-		Value_Change(self->parametr, 16, y, self->step, self->mode, 0, 65535, &Incoder_P2_Count);
+	while(Incoder_Get_Button_State(Incoder)!=Incoder_Button_long){
+		Value_Change(self->parametr, 16, y, self->step, self->mode, 0, 65535, Incoder);
 	}
-	Incoder_Button_State_P2=Incoder_Button_NotPressed;
+	Incoder_Reset_Button_State(Incoder);
 
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-void Menu_List_Element_Vector_it(struct Menu_List_Element_Vector *self){
+void Menu_List_Element_Vector_it(struct Menu_List_Element_Vector *self, struct Incoder *Incoder){
 	int Menu_Count=0;
 	uint8_t MAX_ID=Menu_List_Vector_Size(self);
-	Incoder_Button_State_P2=Incoder_Button_NotPressed;
+	Incoder_Reset_Button_State(Incoder);
 	Menu_List_Element_Vector_Drow(self, (uint8_t)(Menu_Count/DROW_LIMIT)*DROW_LIMIT, DROW_LIMIT,1);
 	OLED_Set_Menu_Cursor(&OLED1, 0, Menu_Count% DROW_LIMIT+1,1);
-	while(Incoder_Button_State_P2!=Incoder_Button_long){
-		Menu_Count+= Incoder_P2_Count;
-		Incoder_P2_Count=0;
+
+	while(Incoder_Get_Button_State(Incoder)!=Incoder_Button_long){
+
+		Menu_Count+= Incoder_Get_Rotary_Switch_Buffer(Incoder);
+		Incoder_Reset_Rotary_Switch_Buffer(Incoder);
+
 		if(Menu_Count<0)
 			Menu_Count=0;
 		else if(Menu_Count>MAX_ID)
@@ -246,15 +195,15 @@ void Menu_List_Element_Vector_it(struct Menu_List_Element_Vector *self){
 		Menu_List_Element_Vector_Drow(self, (uint8_t)(Menu_Count/DROW_LIMIT)*DROW_LIMIT, DROW_LIMIT,0);
 		OLED_Set_Menu_Cursor(&OLED1, 0, Menu_Count% DROW_LIMIT+1,0);
 
-		if(Incoder_Button_State_P2==Incoder_Button_Short){
+		if(Incoder_Get_Button_State(Incoder)==Incoder_Button_Short){
 			struct Menu_List_Element_Vector *now;
 			now=self;
 			while(now->ID!=Menu_Count){
 				now=now->next;
 			}
-			Menu_List_Element_Value_Change(now,  now->ID% DROW_LIMIT+1);
+			Menu_List_Element_Value_Change(now,  now->ID% DROW_LIMIT+1,Incoder);
 			OLED_Set_Menu_Cursor(&OLED1, 0, Menu_Count% DROW_LIMIT+1,1);
-			Incoder_Button_State_P2=Incoder_Button_NotPressed;
+			Incoder_Reset_Button_State(Incoder);
 		}
 	}
 }
@@ -332,20 +281,22 @@ void OLED_Set_Menu_List_Cursor(struct OLED *self, uint8_t x, uint8_t y,uint8_t L
 	}
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-void Menu_List_Vector_it(struct Menu_List_Vector *self){
+void Menu_List_Vector_it(struct Menu_List_Vector *self, struct Incoder *Incoder){
 	int Menu_Count=0;
 	uint8_t mas[15]; // 0 Length 1-st str; 1 start position 1-st str; 2 lenth 1-st str; 3 start postition 2-st str.......
 
 
 	uint8_t MAX_ID=Menu_List_Size(self);
-	Incoder_Button_State_P2=Incoder_Button_NotPressed;
+	Incoder_Reset_Button_State(Incoder);
 	Menu_Center_String_Drow("MENU",0,NULL);
 	Menu_List_Vector_Drow(self, (uint8_t)(Menu_Count/DROW_LIMIT)*DROW_LIMIT, DROW_LIMIT,1, &mas[0]);
 	OLED_Set_Menu_List_Cursor(&OLED1, mas[1], Menu_Count% DROW_LIMIT+1,mas[0],1);
 
-	while(Incoder_Button_State_P2!=Incoder_Button_long){
-		Menu_Count+= Incoder_P2_Count;
-		Incoder_P2_Count=0;
+	while(Incoder_Get_Button_State(Incoder)!=Incoder_Button_long){
+
+		Menu_Count+= Incoder_Get_Rotary_Switch_Buffer(Incoder);
+		Incoder_Reset_Rotary_Switch_Buffer(Incoder);
+
 		if(Menu_Count<0)
 			Menu_Count=0;
 		else if(Menu_Count>MAX_ID)
@@ -354,7 +305,7 @@ void Menu_List_Vector_it(struct Menu_List_Vector *self){
 		Menu_List_Vector_Drow(self, (uint8_t)(Menu_Count/DROW_LIMIT)*DROW_LIMIT, DROW_LIMIT,0,&mas[0]);
 		OLED_Set_Menu_List_Cursor(&OLED1, mas[(Menu_Count% DROW_LIMIT)*2+1], Menu_Count% DROW_LIMIT+1,mas[(Menu_Count% DROW_LIMIT)*2],0);
 
-		if(Incoder_Button_State_P2==Incoder_Button_Short){   								//Element select
+		if(Incoder_Get_Button_State(Incoder)==Incoder_Button_Short){   								//Element select
 			struct Menu_List_Vector *now;
 			now=self;
 			while(now->ID!=Menu_Count){
@@ -362,7 +313,7 @@ void Menu_List_Vector_it(struct Menu_List_Vector *self){
 			}
 
 			Menu_Center_String_Drow(now->name,0,NULL);										//Draw name of element menu
-			Menu_List_Element_Vector_it(now->Menu_List_Element_Vector);						//Transceive control to Menu_List_Element_Vector menu
+			Menu_List_Element_Vector_it(now->Menu_List_Element_Vector, Incoder);						//Transceive control to Menu_List_Element_Vector menu
 																							//Area after resceive control start
 
 			Soldering_Station_Write_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
@@ -370,7 +321,7 @@ void Menu_List_Vector_it(struct Menu_List_Vector *self){
 			Menu_Center_String_Drow("MENU",0,NULL);
 			Menu_List_Vector_Drow(self, (uint8_t)(Menu_Count/DROW_LIMIT)*DROW_LIMIT, DROW_LIMIT,1, &mas[0]);
 			OLED_Set_Menu_List_Cursor(&OLED1, mas[(Menu_Count% DROW_LIMIT)*2+1], Menu_Count% DROW_LIMIT+1,mas[(Menu_Count% DROW_LIMIT)*2],1);
-			Incoder_Button_State_P2=Incoder_Button_NotPressed;
+			Incoder_Reset_Button_State(Incoder);
 																							//Area after resceive control end
 		}
 	}
@@ -434,40 +385,40 @@ void start_Page_Drow(){
 void Button_Handler(struct Button* self){
 	switch(self->ID){
 		case Button_ID_E2B1:
-			if((self->State==GPIO_PIN_RESET)&&(Soldering_Iron.State==1)){
+			if((Button_Get_Pin_State(self)==GPIO_PIN_RESET)&&(Soldering_Iron.State==1)){
 				Solder_Iron_Sleep_Time_Resset(&Soldering_Iron);
 				Solder_Iron_Set_Temperature(&Soldering_Iron,PRESSET2);
 			}
 			break;
 		case Button_ID_E2B2:
-			if(self->State==GPIO_PIN_RESET){
+			if(Button_Get_Pin_State(self)==GPIO_PIN_RESET){
 				Soldering_Heat_Gun_Set_Temperature(&Soldering_Heat_Gun,PRESSET2);
 			}
 
 			break;
 		case Button_ID_E2B3:
-			if(self->State==GPIO_PIN_RESET)
+			if(Button_Get_Pin_State(self)==GPIO_PIN_RESET)
 				Soldering_Separator_Set_Temperature(&Soldering_Separator, PRESSET2);
 
 			break;
 		case Button_ID_E1B1:
-			if((self->State==GPIO_PIN_RESET)&&(Soldering_Iron.State==1)){
+			if((Button_Get_Pin_State(self)==GPIO_PIN_RESET)&&(Soldering_Iron.State==1)){
 				Solder_Iron_Sleep_Time_Resset(&Soldering_Iron);
 				Solder_Iron_Set_Temperature(&Soldering_Iron, PRESSET1);
 			}
 			break;
 		case Button_ID_E1B2:
-			if(self->State==GPIO_PIN_RESET){
+			if(Button_Get_Pin_State(self)==GPIO_PIN_RESET){
 				Soldering_Heat_Gun_Set_Temperature(&Soldering_Heat_Gun, PRESSET1);
 			}
 
 			break;
 		case Button_ID_E1B3:
-			if(self->State==GPIO_PIN_RESET)
+			if(Button_Get_Pin_State(self)==GPIO_PIN_RESET)
 				Soldering_Separator_Set_Temperature(&Soldering_Separator, PRESSET1);
 			break;
 		case Button_Gerkon_ID:
-			if(self->State==GPIO_PIN_RESET)
+			if(Button_Get_Pin_State(self)==GPIO_PIN_RESET)
 				Soldering_Heat_Gun_OFF(&Soldering_Heat_Gun);
 			else
 				Soldering_Heat_Gun_ON(&Soldering_Heat_Gun);
@@ -475,7 +426,7 @@ void Button_Handler(struct Button* self){
 			break;
 		case Full_Power_Button_ID:
 			if(Soldering_Iron.State==1){
-				if(self->State==GPIO_PIN_RESET){
+				if(Button_Get_Pin_State(self)==GPIO_PIN_RESET){
 					Soldering_Iron.Full_Power_State=1;
 				}else{
 					Soldering_Iron.Full_Power_State=0;
@@ -488,39 +439,41 @@ void Button_Handler(struct Button* self){
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-void Menu_it(struct Menu_List_Vector *self){
+void Menu_it(struct Menu_List_Vector *self, struct Incoder *Incoder_P1, struct Incoder *Incoder_P2){
 
-	Incoder_Button_State_P2=Incoder_Button_NotPressed;
+	enum {
+		Interface_Contoll_Soldering_Heat_Gun,
+		Interface_Contoll_Soldering_Separator
+	}Interface_Contoll;
+
 	Interface_Contoll=Interface_Contoll_Soldering_Heat_Gun;
 	start_Page_Drow();
 
 	while(1){
 
-		if(Incoder_Button_State_P2==Incoder_Button_long){
-			Incoder_P2_Count=0;
+		if(Incoder_Get_Button_State(Incoder_P2)==Incoder_Button_long){
 
 			Solder_Iron_OFF(&Soldering_Iron);
 			Soldering_Heat_Gun_OFF(&Soldering_Heat_Gun);
 			Soldering_Separator_OFF(&Soldering_Separator);
 
-
-			Menu_List_Vector_it(self);
-			Incoder_Button_State_P2=Incoder_Button_NotPressed;
+			Menu_List_Vector_it(self, Incoder_P2);
+			Incoder_Reset_Button_State(Incoder_P2);
 			start_Page_Drow();
 		}
-		if(Incoder_Button_State_P1==Incoder_Button_long){
-			Incoder_Button_State_P1=Incoder_Button_NotPressed;
+		if(Incoder_Get_Button_State(Incoder_P1)==Incoder_Button_long){
+			Incoder_Reset_Button_State(Incoder_P1);
 			if(Interface_Contoll==Interface_Contoll_Soldering_Heat_Gun)
 				Interface_Contoll=Interface_Contoll_Soldering_Separator;
 			else
 				Interface_Contoll=Interface_Contoll_Soldering_Heat_Gun;
 		}
 
-		Value_Changing(&Soldering_Iron.Temperature_Pressets.Manual, 100, UINT16, 800, MAX_ADC_Value, &Incoder_P2_Count);
+		Value_Changing(&Soldering_Iron.Temperature_Pressets.Manual, 100, UINT16, 800, MAX_ADC_Value, Incoder_P2);
 		if(Interface_Contoll==Interface_Contoll_Soldering_Heat_Gun)
-			Value_Changing(&Soldering_Heat_Gun.Temperature_Pressets.Manual, 100, UINT16, 400, MAX_ADC_Value, &Incoder_P1_Count);
+			Value_Changing(&Soldering_Heat_Gun.Temperature_Pressets.Manual, 100, UINT16, 400, MAX_ADC_Value, Incoder_P1);
 		else
-			Value_Changing(&Soldering_Separator.Temperature_Pressets.Manual, 100, UINT16, 400, MAX_ADC_Value, &Incoder_P1_Count);
+			Value_Changing(&Soldering_Separator.Temperature_Pressets.Manual, 100, UINT16, 400, MAX_ADC_Value, Incoder_P1);
 
 
 
@@ -544,8 +497,8 @@ void Menu_it(struct Menu_List_Vector *self){
 
 
 
-		if(Incoder_Button_State_P2==Incoder_Button_Short){                 //Solder_Iron_ON/OFF
-			Incoder_Button_State_P2=Incoder_Button_NotPressed;
+		if(Incoder_Get_Button_State(Incoder_P2)==Incoder_Button_Short){                 //Solder_Iron_ON/OFF
+			Incoder_Reset_Button_State(Incoder_P2);
 			if(Soldering_Iron.State==0){
 				Solder_Iron_ON(&Soldering_Iron);
 			}else{
@@ -553,15 +506,15 @@ void Menu_it(struct Menu_List_Vector *self){
 			}
 		}
 
-		if(Incoder_Button_State_P1==Incoder_Button_Short&&Interface_Contoll==Interface_Contoll_Soldering_Heat_Gun){		//Soldering_Heat_Gun_ON/OFF
-			Incoder_Button_State_P1=Incoder_Button_NotPressed;
+		if(Incoder_Get_Button_State(Incoder_P1)==Incoder_Button_Short&&Interface_Contoll==Interface_Contoll_Soldering_Heat_Gun){		//Soldering_Heat_Gun_ON/OFF
+			Incoder_Reset_Button_State(Incoder_P1);
 			if(Soldering_Heat_Gun.State!=Heat_Gun_ON)
 				Soldering_Heat_Gun_ON(&Soldering_Heat_Gun);
 			else
 				Soldering_Heat_Gun_OFF(&Soldering_Heat_Gun);
 		}
-		else if(Incoder_Button_State_P1==Incoder_Button_Short&&Interface_Contoll==Interface_Contoll_Soldering_Separator){
-			Incoder_Button_State_P1=Incoder_Button_NotPressed;															//Soldering_Separator_ON/OFF
+		else if(Incoder_Get_Button_State(Incoder_P1)==Incoder_Button_Short&&Interface_Contoll==Interface_Contoll_Soldering_Separator){
+			Incoder_Reset_Button_State(Incoder_P1);															//Soldering_Separator_ON/OFF
 				if(Soldering_Separator.State!=Separator_ON)
 					Soldering_Separator_ON(&Soldering_Separator);
 				else

@@ -5,7 +5,31 @@
  *  Created on: Jul 30, 2024
  *      Author: I
  */
-
+//---------------------------------------------------------------------------------
+void Incoder_Handler(struct Incoder *self){
+	if(self->Rotary_Switch.event){
+		if(self->Rotary_Switch.Rotary_Switch_Direcion==Direct)
+			if(self->Rotary_Switch.State){
+				self->Incoder_Rotary_Switch_Buffer++;
+			}
+			else{
+				self->Incoder_Rotary_Switch_Buffer--;
+			}
+		else
+			if(self->Rotary_Switch.State){
+				self->Incoder_Rotary_Switch_Buffer--;
+			}
+			else{
+				self->Incoder_Rotary_Switch_Buffer++;
+			}
+	}else if(self->Button.event){
+		if(self->Button.State==1){
+			self->Incoder_Button_State=Incoder_Button_Short;
+		}else{
+			self->Incoder_Button_State=Incoder_Button_long;
+		}
+	}
+}
 //---------------------------------------------------------------------------------
 void Rotary_Switch_Handler(struct Rotary_Switch *self){
 	self->event=1;
@@ -38,9 +62,8 @@ void Button_MODE_it(struct Button* self){
 
 		case Button_Mode_Regular_With_EXTI:
 			if(self->PIN_State==HAL_GPIO_ReadPin(self->GPIO,self->PIN)){
-				self->State=self->PIN_State;
+				self->Stable_State=self->PIN_State;
 				Button_Handler(self);
-				self->Previos_Stable_State=self->State;
 			}
 			self->count=0;
 			self->Flag=0;
@@ -145,6 +168,26 @@ void Button_Vector_it(struct Button_Vector *self){
 	} while(NOW!=NULL);
 }
 //---------------------------------------------------------------------------------
+GPIO_PinState Button_Get_Pin_State(struct Button* self){
+	return self->Stable_State;
+}
+//---------------------------------------------------------------------------------
+void Incoder_Reset_Rotary_Switch_Buffer(struct Incoder *self){
+	self->Incoder_Rotary_Switch_Buffer=0;
+}
+//---------------------------------------------------------------------------------
+int Incoder_Get_Rotary_Switch_Buffer(struct Incoder *self){
+	return  self->Incoder_Rotary_Switch_Buffer;
+}
+//---------------------------------------------------------------------------------
+void Incoder_Reset_Button_State(struct Incoder *self){
+	self->Incoder_Button_State=Incoder_Button_NotPressed;
+}
+//---------------------------------------------------------------------------------
+enum Incoder_Button_State Incoder_Get_Button_State(struct Incoder *self){
+	return self->Incoder_Button_State;
+}
+//---------------------------------------------------------------------------------
 void Rotary_Switch_ini(struct Rotary_Switch *self){
 
 }
@@ -155,6 +198,8 @@ void Incoder_ini(struct Incoder *self){
 	self->Rotary_Switch.base=self;
 	self->Button.ID=self->ID;
 	self->Rotary_Switch.ID=self->ID;
+	self->Incoder_Button_State=Incoder_Button_NotPressed;
+	self->Incoder_Rotary_Switch_Buffer=0;
 }
 //---------------------------------------------------------------------------------
 
