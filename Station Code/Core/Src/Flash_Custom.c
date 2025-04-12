@@ -5,18 +5,14 @@
  *      Author: I
  */
 #include "Flash_Custom.h"
-
-
-
 //---------------------------------------------------------------------------------
 uint8_t Flash_Erase (uint32_t addr, uint16_t size){
 
 	/**
-	  * @addr  Base address.
-	  * @size  Size all data for recording into page.
-	  * @return HAL_StatusTypeDef HAL_OK or HAL_ERROR .
+	  * addr  Base address.
+	  * size  Size all data for recording into page.
+	  * return HAL_StatusTypeDef HAL_OK or HAL_ERROR .
 	  */
-
 		FLASH_EraseInitTypeDef FlashErase;
 		uint32_t sectorError = 0;
 
@@ -65,6 +61,12 @@ uint32_t Flash_Write (uint32_t addr, void *data_ptr, uint16_t size){
 }
 //---------------------------------------------------------------------------------
 void Flash_Read (uint32_t addr, void *data_ptr, uint16_t size){
+	/**
+	 * Read data from flash into data_ptr
+	 * addr  Base address.
+	 * size  Size all data for recording into page.
+	 *
+	 */
 	for (int i = 0; i < size; i++)
 	{
 		((uint8_t *)data_ptr)[i] = *(__IO uint32_t*)addr;

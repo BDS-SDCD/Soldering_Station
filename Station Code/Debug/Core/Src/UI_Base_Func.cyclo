@@ -1,0 +1,10 @@
+../Core/Src/UI_Base_Func.c:3:6:UI_Draw_Parmetr_Ptr	8
+../Core/Src/UI_Base_Func.c:54:6:UI_Draw_Parmetr	1
+../Core/Src/UI_Base_Func.c:61:6:UI_Draw_String	1
+../Core/Src/UI_Base_Func.c:70:6:UI_Set_Cursor	1
+../Core/Src/UI_Base_Func.c:83:6:UI_Clear_Line	1
+../Core/Src/UI_Base_Func.c:90:6:UI_Change_Value_Ptr	11
+../Core/Src/UI_Base_Func.c:124:5:UI_Change_Value	1
+../Core/Src/UI_Base_Func.c:133:6:UI_Draw_String_Center	1
+../Core/Src/UI_Base_Func.c:143:6:UI_Encoder_Reset_Rotary_Switch_Buffer	1
+../Core/Src/UI_Base_Func.c:150:6:UI_Encoder_Reset_Button_State	1

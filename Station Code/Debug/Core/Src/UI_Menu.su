@@ -1,0 +1,12 @@
+../Core/Src/UI_Menu.c:4:6:Menu_List_Element_Draw	16	static
+../Core/Src/UI_Menu.c:13:6:Menu_List_Element_Vector_Draw	24	static
+../Core/Src/UI_Menu.c:29:9:Menu_List_Vector_Size	24	static
+../Core/Src/UI_Menu.c:41:9:Get_Prescaler	24	static
+../Core/Src/UI_Menu.c:76:6:Menu_List_Element_Value_Change	40	static
+../Core/Src/UI_Menu.c:91:6:UI_Menu_List_Element_Vector_it	40	static
+../Core/Src/UI_Menu.c:136:6:UI_Menu_List_Element_Create	40	static
+../Core/Src/UI_Menu.c:162:9:Menu_List_Size	24	static
+../Core/Src/UI_Menu.c:174:6:Menu_List_Vector_Draw	24	static
+../Core/Src/UI_Menu.c:194:6:Menu_Set_List_Cursor	24	static
+../Core/Src/UI_Menu.c:211:6:UI_Menu_it	40	static
+../Core/Src/UI_Menu.c:259:6:UI_Menu_List_Create	40	static

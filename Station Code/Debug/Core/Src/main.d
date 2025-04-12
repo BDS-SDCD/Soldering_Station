@@ -27,8 +27,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Core/Inc/OLED.h ../Core/Inc/PID.h ../Core/Inc/Filter.h \
- ../Core/Inc/Button.h ../Core/Inc/Menu.h ../Core/Inc/Flash_Custom.h \
- ../Core/Inc/Soldering_Station.h ../Core/Inc/PAC.h
+ ../Core/Inc/Button.h ../Core/Inc/UI_Menu.h ../Core/Inc/Flash_Custom.h \
+ ../Core/Inc/UI_Base_Func.h ../Core/Inc/Soldering_Station.h \
+ ../Core/Inc/PAC.h ../Core/Inc/UI_Face.h ../Core/Inc/PAC.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -61,7 +62,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/PID.h:
 ../Core/Inc/Filter.h:
 ../Core/Inc/Button.h:
-../Core/Inc/Menu.h:
+../Core/Inc/UI_Menu.h:
 ../Core/Inc/Flash_Custom.h:
+../Core/Inc/UI_Base_Func.h:
 ../Core/Inc/Soldering_Station.h:
+../Core/Inc/PAC.h:
+../Core/Inc/UI_Face.h:
 ../Core/Inc/PAC.h:

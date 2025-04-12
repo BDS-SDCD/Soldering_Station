@@ -1,5 +1,5 @@
-Core/Src/Menu.o: ../Core/Src/Menu.c ../Core/Inc/Menu.h \
- ../Core/Inc/Flash_Custom.h \
+Core/Src/UI_Face.o: ../Core/Src/UI_Face.c ../Core/Inc/UI_Face.h \
+ ../Core/Inc/UI_Base_Func.h \
  ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h \
  ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h \
  ../Drivers/CMSIS/Include/core_cm3.h \
@@ -27,10 +27,11 @@ Core/Src/Menu.o: ../Core/Src/Menu.c ../Core/Inc/Menu.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Core/Inc/OLED.h ../Core/Inc/Button.h ../Core/Inc/PID.h \
- ../Core/Inc/Soldering_Station.h ../Core/Inc/PAC.h ../Core/Inc/Filter.h
-../Core/Inc/Menu.h:
-../Core/Inc/Flash_Custom.h:
+ ../Core/Inc/OLED.h ../Core/Inc/Button.h ../Core/Inc/Soldering_Station.h \
+ ../Core/Inc/PAC.h ../Core/Inc/PID.h ../Core/Inc/Filter.h \
+ ../Core/Inc/Flash_Custom.h
+../Core/Inc/UI_Face.h:
+../Core/Inc/UI_Base_Func.h:
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:
 ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h:
 ../Drivers/CMSIS/Include/core_cm3.h:
@@ -60,7 +61,8 @@ Core/Src/Menu.o: ../Core/Src/Menu.c ../Core/Inc/Menu.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Core/Inc/OLED.h:
 ../Core/Inc/Button.h:
-../Core/Inc/PID.h:
 ../Core/Inc/Soldering_Station.h:
 ../Core/Inc/PAC.h:
+../Core/Inc/PID.h:
 ../Core/Inc/Filter.h:
+../Core/Inc/Flash_Custom.h:

@@ -1,0 +1,4 @@
+../Core/Src/UI_Face.c:4:6:Face_UI_Draw_Name_List	8	static
+../Core/Src/UI_Face.c:36:6:Face_UI_Draw_Parameters_List	8	static
+../Core/Src/UI_Face.c:84:6:Get_Button_State	24	static
+../Core/Src/UI_Face.c:147:6:Face_UI_it	40	static

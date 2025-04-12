@@ -1,3 +1,3 @@
-../Core/Src/Flash_Custom.c:12:9:Flash_Erase	40	static,ignoring_inline_asm
-../Core/Src/Flash_Custom.c:42:10:Flash_Write	40	static,ignoring_inline_asm
-../Core/Src/Flash_Custom.c:67:6:Flash_Read	32	static
+../Core/Src/Flash_Custom.c:9:9:Flash_Erase	40	static,ignoring_inline_asm
+../Core/Src/Flash_Custom.c:38:10:Flash_Write	40	static,ignoring_inline_asm
+../Core/Src/Flash_Custom.c:63:6:Flash_Read	32	static

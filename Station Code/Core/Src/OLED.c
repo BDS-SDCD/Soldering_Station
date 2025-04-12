@@ -1,7 +1,8 @@
 #include "OLED.h"
 
 
-uint16_t CharMass[]={0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   // sp
+uint8_t CharMass[]={							//Mass contains the encoding of ascii characters in the font 6x8
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   // sp
 		0x00, 0x00, 0x00, 0x2f, 0x00, 0x00,   // !
 		0x00, 0x00, 0x07, 0x00, 0x07, 0x00,   // "
 		0x00, 0x14, 0x7f, 0x14, 0x7f, 0x14,   // #
@@ -102,22 +103,22 @@ uint16_t CharMass[]={0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   // sp
 		0x00, 0x00, 0x82, 0x7C, 0x10, 0x00,   // }
 		0x00, 0x00, 0x06, 0x09, 0x09, 0x06    // ~ (Degrees)
 };
+
 //----------------------------------------------------------------------------
-uint8_t Bufer[129]={0};
-//----------------------------------------------------------------------------
-void OLED_Send_Comand(struct OLED * self,uint8_t comand){
+void OLED_Send_Command(struct OLED * self,uint8_t Command){
+	/**
+	 * Send command to the OLED display
+	 */
 	uint8_t Local_Bufer[1]={0};
-	Local_Bufer[0]=OLED_Comand_Buffer;
-	Local_Bufer[1]=comand;
+	Local_Bufer[0]=OLED_Command_Buffer;
+	Local_Bufer[1]=Command;
 	HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Local_Bufer,(uint16_t)2,1000);
 }
 //----------------------------------------------------------------------------
-void OLED_ON(uint8_t stend){
-
-
-}
-//----------------------------------------------------------------------------
 void OLED_Search_Adress(struct OLED * self){
+	/**
+	 *	Searching address for current OLED
+	 */
 	for(int i=0;i<256;i++){
 			if(HAL_I2C_IsDeviceReady((self->hi2c),i,10,2)==HAL_OK){
 				self->Adress=i;
@@ -128,63 +129,71 @@ void OLED_Search_Adress(struct OLED * self){
 //----------------------------------------------------------------------------
 
 void OLED_ini(struct OLED * self){
+	/**
+	 * Command initialization of OLED display
+	 */
+	OLED_Send_Command(self,0xAF);		//Display on/off
 
+	OLED_Send_Command(self,0xA6);		//Normal/inverse color mode
 
+	OLED_Send_Command(self,0x20);		//Set page address mode
+	OLED_Send_Command(self,0x0);
 
-	OLED_Send_Comand(self,0xAF);		//Display on/off
+	OLED_Send_Command(self,0x8d);		//Pump Charge
 
-	OLED_Send_Comand(self,0xA6);		//Normal/inverse color mode
+	OLED_Send_Command(self,0xA4);		//Entire display on (output flows/ignore ram)
 
-	OLED_Send_Comand(self,0x20);		//Set page address mode
-	OLED_Send_Comand(self,0x0);
+	OLED_Send_Command(self,0xA0);		//Segment re-map
 
-	OLED_Send_Comand(self,0x8d);		//Pump Charge
-
-	OLED_Send_Comand(self,0xA4);		//Entire display on (output flows/ignore ram)
-
-	OLED_Send_Comand(self,0xA0);		//Segment re-map
-
-	OLED_Send_Comand(self,0xC7);		//Com output right direction/inverse direction
-
-	OLED_Send_Comand(self,0x21);     //Set COM remap value
-	OLED_Send_Comand(self,0x0);
-	OLED_Send_Comand(self,0x7D);
-
-	OLED_Send_Comand(self,0x22);
-	OLED_Send_Comand(self,0x0);
-	OLED_Send_Comand(self,0x7);
+	OLED_Send_Command(self,0xC7);		//Com output right direction/inverse direction
 
 	OLED_Clear_Display(self);
 
+	OLED_Send_Command(self,0x21);    	//Set COM remap value(Set Column Address)
+	OLED_Send_Command(self,0x1);			//1
+	OLED_Send_Command(self,0x7E);		//126
+
+	OLED_Send_Command(self,0x22);		//Set Page Address
+	OLED_Send_Command(self,0x0);
+	OLED_Send_Command(self,0x7);
+
 }
 //----------------------------------------------------------------------------
-
 void OLED_Set_Cursor(struct OLED * self,uint16_t x,uint8_t y){
-	OLED_Send_Comand(self,0xB0|y);
-	OLED_Send_Comand(self,x & 0x0F);
-	OLED_Send_Comand(self,((x>>4) & 0x0F)+0x10);
-
-
+	/**
+	 * Sets position on display from what will be display
+	 */
+	OLED_Send_Command(self,0xB0|y);
+	OLED_Send_Command(self,x & 0x0F);
+	OLED_Send_Command(self,((x>>4) & 0x0F)+0x10);
 }
 //----------------------------------------------------------------------------
 void OLED_Set_Char_Cursor(struct OLED * self, uint16_t x,uint8_t y){
+	/**
+	 * Sets position on display from what will be display based on ASII symbols size
+	 */
 	x*=6;
-	OLED_Send_Comand(self,0xB0|y);
-	OLED_Send_Comand(self,x & 0x0F);
-	OLED_Send_Comand(self,((x>>4) & 0x0F)+0x10);
-
-
+	OLED_Send_Command(self,0xB0|y);
+	OLED_Send_Command(self,x & 0x0F);
+	OLED_Send_Command(self,((x>>4) & 0x0F)+0x10);
 }
 //----------------------------------------------------------------------------
 void OLED_Clear_Display(struct OLED * self){
-	Bufer[0]=OLED_Data_Buffer;
+	/**
+	 * Clear OLED display
+	 */
+	uint8_t Local_Bufer[129]={0};
+	Local_Bufer[0]=OLED_Data_Buffer;
 	for(uint8_t j=0;j<8;j++){
 		OLED_Set_Cursor(self,0,j);
-		HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Bufer,(uint16_t)129,1000);
+		HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Local_Bufer,(uint16_t)129,1000);
 		}
 }
 //----------------------------------------------------------------------------
 void OLED_Send_Char(struct OLED * self, uint8_t data){
+	/**
+	 * Drawing char on a OLED display
+	 */
 	uint8_t Local_Bufer[7]={0};
 	Local_Bufer[0]=OLED_Data_Buffer;
 	int sp=(data-(int)' ')*6;
@@ -196,47 +205,51 @@ void OLED_Send_Char(struct OLED * self, uint8_t data){
 }
 //----------------------------------------------------------------------------
 void OLED_Clear_Char(struct OLED * self,uint16_t x, uint8_t y){
+	/**
+	 * Clear char on a OLED display
+	 */
 	OLED_Set_Char_Cursor(self,x, y);
 	OLED_Send_Char(self,' ');
 }
 //----------------------------------------------------------------------------
 void OLED_Clear_Line (struct OLED * self, uint8_t y){
-	OLED_Set_Cursor(self,0,y);
-	HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Bufer,(uint16_t)129,1000);
-}
-//----------------------------------------------------------------------------
-void OLED_Send_String(struct OLED * self,char* str){
-
+	/**
+	 * Clear line on OLED display
+	 */
 	uint8_t Local_Bufer[127]={0};
 	Local_Bufer[0]=OLED_Data_Buffer;
+	OLED_Set_Cursor(self,0,y);
+	HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Local_Bufer,(uint16_t)127,1000);
+}
+//----------------------------------------------------------------------------
+void OLED_Send_String(struct OLED * self,char* str, enum Display_Write_MODE Display_Write_MODE){
+	/**
+	 * Drawing string on a OLED display
+	 */
+	uint8_t *Local_Buffer=malloc(sizeof(uint8_t)*strlen(str)*6+1);	//Create a local buffer for str*6(because every symbol has size 6) +1 for data address
+	Local_Buffer[0]=OLED_Data_Buffer;							//Set buffer address as first transfered data
 
-	int i=0,sp,counter=0;
-	uint8_t j,colum=0;
-	while(str[i]!='\0'){
-		if(str[i]=='\r'||str[i]=='\n'){
+	int i=0,													//i sift string symbol every iteration
+		sp;														//Contain the first column of symbol
+	uint8_t j;
+	uint16_t counter=0;											//Count quantity of symbols
+	while(str[i]!='\0'){										//Loop while str not end
+		if(str[i]=='\r'||str[i]=='\n'){							//filter all another special symbols
 			i++;
 			continue;
 		}
-
-		sp=(str[i]-(int)' ')*6;
-		for(j=0;j<6;j++)
-			Local_Bufer[(j+counter*6)+1]=CharMass[sp+j];
-
+		sp=(str[i]-(int)' ')*6;									//Computing the first column of symbol
+		for(j=0;j<6;j++){										//Write 6 column of symbol based on Display_Write_MODE
+			if(Display_Write_MODE==Direct_Display_MODE)
+				Local_Buffer[(j+counter*6)+1]=CharMass[sp+j];
+			else
+				Local_Buffer[(j+counter*6)+1]=~CharMass[sp+j];
+		}
 		i++;
 		counter++;
-
-		if(counter>20){
-			 OLED_Set_Cursor(self,0,colum);
-			HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Local_Bufer,(uint16_t)(counter*6)+1,1000);
-			colum++;
-			counter=0;
-
-		}
 	}
-
-	HAL_I2C_Master_Transmit(self->hi2c,self->Adress,(uint8_t *)&Local_Bufer,(uint16_t)(counter*6)+1,1000);
-
-
+	HAL_I2C_Master_Transmit(self->hi2c,self->Adress,Local_Buffer,(uint16_t)(counter*6)+1,1000);
+	free(Local_Buffer);
 }
 //----------------------------------------------------------------------------
 

@@ -14,16 +14,16 @@
 //---------------------------------------------------------------------------------
 struct Filter{
 	float k;
-	float k_min;
-	float k_max;
+	float k_min;			//MIN koef for adaptive filter
+	float k_max;			//MAX koef for adaptive filter
 	float Filter_Buffer;
 	float Val_Delata;
 	float Val_Now;
 	enum Filter_Mode{
 		Nine_Samples,
 		Three_Samples
-	}Filter_Mode;
-	uint16_t *mass;
+	}Filter_Mode;			//MODE
+	uint16_t *mass;			//pointer to data mass
 };
 //---------------------------------------------------------------------------------
 

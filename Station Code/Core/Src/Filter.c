@@ -1,6 +1,9 @@
 #include"Filter.h"
 //--------------------------------------------------------------------------------- Middle Average Filter
 uint16_t Filter_Mediana_3(uint16_t a,uint16_t b, uint16_t c){
+	/**
+	 * Median filter for 3 samples
+	 */
 	if(a<=b){
 		if(a<=c){
 			if(b<=c)
@@ -23,8 +26,11 @@ uint16_t Filter_Mediana_3(uint16_t a,uint16_t b, uint16_t c){
 				return b;
 	}
 }
-
+//---------------------------------------------------------------------------------
 uint16_t Filter_Mediana_9 (uint16_t *mas){
+	/**
+	 * Median filter for 9 samples
+	 */
 	return	Filter_Mediana_3(
 			Filter_Mediana_3(*mas,*(mas+1), *(mas+2)),
 			Filter_Mediana_3(*(mas+3),*(mas+4), *(mas+5)),
@@ -32,9 +38,12 @@ uint16_t Filter_Mediana_9 (uint16_t *mas){
 }
 //---------------------------------------------------------------------------------
 void Filter_ini(struct Filter * self){
+	/**
+	 * Reset buffer
+	 */
 	self->Filter_Buffer=0;
 }
-//---------------------------------------------------------------------------------  Exponential Moving Average Filter
+//--------------------------------------------------------------------------------- Exponential Moving Average Filter with adaptive koef
 uint16_t Filter_Exp_Mov_Average(struct Filter* self){
 		if(abs((int)self->Val_Now - self->Filter_Buffer)>self->Val_Delata)
 			self->k=self->k_max;
@@ -45,8 +54,11 @@ uint16_t Filter_Exp_Mov_Average(struct Filter* self){
 	  return (uint16_t)self->Filter_Buffer;
 }
 //---------------------------------------------------------------------------------
-
 uint16_t Filter_Combined(struct Filter* self){
+	/**
+	 * 	Exponential Moving Average Filter with adaptive koef combined with Median filter
+	 * 	Return result of Filter
+	 */
 	if(self->Filter_Mode==Three_Samples){
 		self->Val_Now=Filter_Mediana_3(*(self->mass),*((self->mass)+1), *((self->mass)+2));
 	}
@@ -56,6 +68,7 @@ uint16_t Filter_Combined(struct Filter* self){
 	return Filter_Exp_Mov_Average(self);
 }
 //---------------------------------------------------------------------------------
+
 
 
 

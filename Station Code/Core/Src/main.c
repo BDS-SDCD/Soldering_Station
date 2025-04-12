@@ -53,7 +53,7 @@ TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN PV */
 //---------------------------------------------------------------------------------
 struct OLED OLED1;
-struct Incoder Incoder_P2, Incoder_P1;
+struct Encoder Encoder_P2, Encoder_P1;
 struct Button_Vector Button_Vector;
 //struct Button  Full_Power_Button;
 struct Vibration_Sensor VS;
@@ -62,7 +62,6 @@ struct Menu_List_Vector Menu_List_Vector;
 struct Soldering_Iron Soldering_Iron;
 struct Soldering_Heat_Gun Soldering_Heat_Gun;
 struct Soldering_Separator Soldering_Separator;
-struct ZCD ZCD;
 struct PAC PAC;
 
 
@@ -88,65 +87,73 @@ uint16_t ADC_Data[17];
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 //---------------------------------------------------------------------------------
-void ZCD_ON_Callback(struct ZCD *self){
-	Soldering_Heat_Gun.PID.MAX_Control=ZCD.MAX_TIM_Counter;
-	Soldering_Separator.PID.MAX_Control=ZCD.MAX_TIM_Counter;
+void PAC_ON_Callback(struct PAC *self){
+	/**
+	 * Set max MAX_Control_Value for all PID which controlling PAG
+	 */
+	Soldering_Heat_Gun_Set_PID_MAX_Control_Value(PAC_Get_Max_Control_Value(self), &Soldering_Heat_Gun);
+	Soldering_Separator_Set_PID_MAX_Control_Value(PAC_Get_Max_Control_Value(self), &Soldering_Separator);
 }
 //--------------------------------------------------------------------------------- ADC_Callback
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	Solder_Iron_it(&Soldering_Iron);				//PID_IT
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+	/**
+	 * After DAC_Read Analog signal into ADC_Data array
+	 */
+	Solder_Iron_it(&Soldering_Iron);				//PID_IT and PWM Start
 	Soldering_Heat_Gun_it(&Soldering_Heat_Gun);		//PID_IT
-	Soldering_Separator_it(&Soldering_Separator);
+	Soldering_Separator_it(&Soldering_Separator);	//PID_IT
 }
 //--------------------------------------------------------------------------------- EXTI
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN)
-{
-	if(PAC_EXTI(&PAC,&GPIO_PIN)!=1){
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
+
+	if(PAC_EXTI(&PAC,&GPIO_PIN)==0){					//if interrupt was from PAC's part(ZCD) skip all another checks
 		Button_Vector_EXTI(&Button_Vector,&GPIO_PIN);
-		Incoder_EXTI(&Incoder_P2, &GPIO_PIN);
-		Incoder_EXTI(&Incoder_P1, &GPIO_PIN);
+		Encoder_EXTI(&Encoder_P2, &GPIO_PIN);
+		Encoder_EXTI(&Encoder_P1, &GPIO_PIN);
 	}
 }
 //---------------------------------------------------------------------------------TIM_Callback
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+
 	static uint8_t prescaler=1;
 
 
         if(htim->Instance == TIM1) //check if the interrupt comes from TIM1									//ADC DMA
         {
-        	if(prescaler==1){
-        		HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_4);
+        	if(prescaler==1){													//First we needed stop PWM to read cotect temperature from ADC
+        		HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_4);						//
         		prescaler=0;
         	}
-        	else{
-        		HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Data[0],(uint32_t)16);
+        	else{																//in next tim interrupt
+        		HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&ADC_Data[0],(uint32_t)16);	//Read data from ADC by DMA
         		prescaler=1;
         	}
         }else if(htim->Instance == TIM3){																	//Service  TIM3
         	Flash_Rewrite_Timer_tim_it(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
         	Solder_Iron_tim_it(&Soldering_Iron);
         	Button_Vector_it(&Button_Vector);
-        	Incoder_it(&Incoder_P1);
-        	Incoder_it(&Incoder_P2);
-        }else if(htim->Instance == TIM4){
+        	Encoder_it(&Encoder_P1);
+        	Encoder_it(&Encoder_P2);
+        }else if(htim->Instance == TIM4){						//Timer only for PAC
         	PAC_it(&PAC);
         }
 }
 //--------------------------------------------------------------------------------- INI Blocks
 void BUTTON_INI(void){
+	/**
+	 * Button initialization
+	 */
 	struct Button Button_ini;
 
-	Button_ini.ID=Button_ID_E2B1;
-	Button_ini.count_max=2;
-	Button_ini.EXTI_PIN=GPIO_PIN_14;
-	Button_ini.PIN=GPIO_PIN_8;
-	Button_ini.GPIO=GPIOA;
-	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
+	Button_ini.ID=Button_ID_SW8;		//ID
+	Button_ini.count_max=2;				//Contact bounce in tim interrupts
+	Button_ini.EXTI_PIN=GPIO_PIN_14;	//in my schematic different buttons have the same EXTI pin
+	Button_ini.PIN=GPIO_PIN_8;			//Actual state pin
+	Button_ini.GPIO=GPIOA;				//Actual pin state GPIO
+	Button_ini.MODE=Button_Mode_Regular_With_EXTI;//MODE
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	Button_ini.ID=Button_ID_E2B2;
+	Button_ini.ID=Button_ID_SW6;
 	Button_ini.count_max=2;
 	Button_ini.EXTI_PIN=GPIO_PIN_14;
 	Button_ini.PIN=GPIO_PIN_9;
@@ -154,7 +161,7 @@ void BUTTON_INI(void){
 	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	Button_ini.ID=Button_ID_E2B3;
+	Button_ini.ID=Button_ID_SW5;
 	Button_ini.count_max=2;
 	Button_ini.EXTI_PIN=GPIO_PIN_14;
 	Button_ini.PIN=GPIO_PIN_10;
@@ -162,7 +169,7 @@ void BUTTON_INI(void){
 	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	Button_ini.ID=Button_ID_E1B1;
+	Button_ini.ID=Button_ID_SW2;
 	Button_ini.count_max=2;
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_4;
@@ -170,7 +177,7 @@ void BUTTON_INI(void){
 	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	Button_ini.ID=Button_ID_E1B2;
+	Button_ini.ID=Button_ID_SW3;
 	Button_ini.count_max=2;
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_5;
@@ -178,7 +185,7 @@ void BUTTON_INI(void){
 	Button_ini.MODE=Button_Mode_Regular_With_EXTI;
 	Button_Vector_Create(&Button_Vector,&Button_ini);
 
-	Button_ini.ID=Button_ID_E1B3;
+	Button_ini.ID=Button_ID_SW7;
 	Button_ini.count_max=2;
 	Button_ini.EXTI_PIN=GPIO_PIN_3;
 	Button_ini.PIN=GPIO_PIN_8;
@@ -197,39 +204,39 @@ void BUTTON_INI(void){
 
 }
 //---------------------------------------------------------------------------------
-void INCODER_INI(void){
-	Incoder_P2.ID=Incoder_ID_P2;
-	Incoder_P2.Button.count_max=2;
-	Incoder_P2.Button.EXTI_PIN=GPIO_PIN_14;
-	Incoder_P2.Button.PIN=GPIO_PIN_15;
-	Incoder_P2.Button.GPIO=GPIOB;
-	Incoder_P2.Button.Presed_counter_max=3;
-	Incoder_P2.Button.MODE=Button_Mode_Incoder;
+void Encoder_INI(void){
+	Encoder_P2.ID=Encoder_ID_P2;
+	Encoder_P2.Button.count_max=2;
+	Encoder_P2.Button.EXTI_PIN=GPIO_PIN_14;
+	Encoder_P2.Button.PIN=GPIO_PIN_15;
+	Encoder_P2.Button.GPIO=GPIOB;
+	Encoder_P2.Button.Presed_counter_max=3;
+	Encoder_P2.Button.MODE=Button_Mode_Encoder;
 
-	Incoder_P2.Rotary_Switch.State=0;
-	Incoder_P2.Rotary_Switch.EXTI_PIN=GPIO_PIN_12;
-	Incoder_P2.Rotary_Switch.PIN=GPIO_PIN_13;
-	Incoder_P2.Rotary_Switch.GPIO=GPIOB;
-	Incoder_P2.Rotary_Switch.Rotary_Switch_Direcion=Reverse;
+	Encoder_P2.Rotary_Switch.State=0;
+	Encoder_P2.Rotary_Switch.EXTI_PIN=GPIO_PIN_12;
+	Encoder_P2.Rotary_Switch.PIN=GPIO_PIN_13;
+	Encoder_P2.Rotary_Switch.GPIO=GPIOB;
+	Encoder_P2.Rotary_Switch.Rotary_Switch_Direcion=Reverse;
 
-	Incoder_ini(&Incoder_P2);
+	Encoder_ini(&Encoder_P2);
 
 
-	Incoder_P1.ID=Incoder_ID_P1;
-	Incoder_P1.Button.count_max=2;
-	Incoder_P1.Button.EXTI_PIN=GPIO_PIN_3;
-	Incoder_P1.Button.PIN=GPIO_PIN_12;
-	Incoder_P1.Button.GPIO=GPIOA;
-	Incoder_P1.Button.Presed_counter_max=3;
-	Incoder_P1.Button.MODE=Button_Mode_Incoder;
+	Encoder_P1.ID=Encoder_ID_P1;
+	Encoder_P1.Button.count_max=2;
+	Encoder_P1.Button.EXTI_PIN=GPIO_PIN_3;
+	Encoder_P1.Button.PIN=GPIO_PIN_12;
+	Encoder_P1.Button.GPIO=GPIOA;
+	Encoder_P1.Button.Presed_counter_max=3;
+	Encoder_P1.Button.MODE=Button_Mode_Encoder;
 
-	Incoder_P1.Rotary_Switch.State=0;
-	Incoder_P1.Rotary_Switch.EXTI_PIN=GPIO_PIN_15;
-	Incoder_P1.Rotary_Switch.PIN=GPIO_PIN_11;
-	Incoder_P1.Rotary_Switch.GPIO=GPIOA;
-	Incoder_P1.Rotary_Switch.Rotary_Switch_Direcion=Direct;
+	Encoder_P1.Rotary_Switch.State=0;
+	Encoder_P1.Rotary_Switch.EXTI_PIN=GPIO_PIN_15;
+	Encoder_P1.Rotary_Switch.PIN=GPIO_PIN_11;
+	Encoder_P1.Rotary_Switch.GPIO=GPIOA;
+	Encoder_P1.Rotary_Switch.Rotary_Switch_Direcion=Direct;
 
-	Incoder_ini(&Incoder_P1);
+	Encoder_ini(&Encoder_P1);
 
 }
 //----------------------------------------------------------------------------
@@ -239,139 +246,137 @@ void MENU_INI(void){
 
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Manual";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection.Manual;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection_C.Manual;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Preset1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Pressets.Presset1;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Presets_C.Preset1;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Pres1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection.Presset1;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection_C.Preset1;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Preset2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Pressets.Presset2;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Presets_C.Preset2;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Pres2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection.Presset2;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Corection_C.Preset2;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Sleep_mode_T";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Pressets.Sleep;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Temperature_Presets_C.Sleep;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Sleep_timer";
 	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Sleep_time;
 	Menu_List_Element_Vector_ini.mode=UINT8;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Disable_timer";
 	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Disable_time;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-	Menu_List_Element_Vector_ini.name="Add_Temperature";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.Add_Temperature;
-	Menu_List_Element_Vector_ini.mode=UINT16;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
-
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="State";
 	Menu_List_Element_Vector_ini.parametr=&Soldering_Iron.State;
 	Menu_List_Element_Vector_ini.mode=BOOL;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Iron_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 
-	Menu_List_Create(&Menu_List_Vector,&Soldering_Iron_Menu_Vector, "Soldering_Iron");
-
-
-	Menu_List_Element_Vector_ini.name="T_Corect_Manual";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection.Manual;
-	Menu_List_Element_Vector_ini.mode=INT;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-	Menu_List_Element_Vector_ini.name="Preset1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Pressets.Presset1;
-	Menu_List_Element_Vector_ini.mode=UINT16;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-	Menu_List_Element_Vector_ini.name="T_Corect_Pres1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection.Presset1;
-	Menu_List_Element_Vector_ini.mode=INT;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-	Menu_List_Element_Vector_ini.name="Preset2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Pressets.Presset2;
-	Menu_List_Element_Vector_ini.mode=UINT16;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-	Menu_List_Element_Vector_ini.name="T_Corect_Pres2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection.Presset2;
-	Menu_List_Element_Vector_ini.mode=INT;
-	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
-
-
-
-
-	Menu_List_Create(&Menu_List_Vector,&Soldering_Heat_Gun_Menu_Vector, "Heat_Gun");
-
+	UI_Menu_List_Create(&Menu_List_Vector,&Soldering_Iron_Menu_Vector, " Soldering_Iron ");
 
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Manual";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection.Manual;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection_C.Manual;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Preset1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Pressets.Presset1;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Presets_C.Preset1;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Pres1";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection.Presset1;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection_C.Preset1;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="Preset2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Pressets.Presset2;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Presets_C.Preset2;
 	Menu_List_Element_Vector_ini.mode=UINT16;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Separator_Menu_Vector,&Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 	Menu_List_Element_Vector_ini.name="T_Corect_Pres2";
-	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection.Presset2;
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Corection_C.Preset2;
 	Menu_List_Element_Vector_ini.mode=INT;
 	Menu_List_Element_Vector_ini.step=1;
-	Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
+
+	Menu_List_Element_Vector_ini.name="T_Cooling_C";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Heat_Gun.Temperature_Coolling.C;
+	Menu_List_Element_Vector_ini.mode=UINT16;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Heat_Gun_Menu_Vector,&Menu_List_Element_Vector_ini);
 
 
-	Menu_List_Create(&Menu_List_Vector,&Soldering_Separator_Menu_Vector, "Separator");
+
+	UI_Menu_List_Create(&Menu_List_Vector,&Soldering_Heat_Gun_Menu_Vector, " Heat_Gun ");
+
+
+
+	Menu_List_Element_Vector_ini.name="T_Corect_Manual";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection_C.Manual;
+	Menu_List_Element_Vector_ini.mode=INT;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+
+	Menu_List_Element_Vector_ini.name="Preset1";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Presets_C.Preset1;
+	Menu_List_Element_Vector_ini.mode=UINT16;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+
+	Menu_List_Element_Vector_ini.name="T_Corect_Pres1";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection_C.Preset1;
+	Menu_List_Element_Vector_ini.mode=INT;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+
+	Menu_List_Element_Vector_ini.name="Preset2";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Presets_C.Preset2;
+	Menu_List_Element_Vector_ini.mode=UINT16;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Separator_Menu_Vector,&Menu_List_Element_Vector_ini);
+
+	Menu_List_Element_Vector_ini.name="T_Corect_Pres2";
+	Menu_List_Element_Vector_ini.parametr=&Soldering_Separator.Temperature_Corection_C.Preset2;
+	Menu_List_Element_Vector_ini.mode=INT;
+	Menu_List_Element_Vector_ini.step=1;
+	UI_Menu_List_Element_Create(&Soldering_Separator_Menu_Vector, &Menu_List_Element_Vector_ini);
+
+
+	UI_Menu_List_Create(&Menu_List_Vector,&Soldering_Separator_Menu_Vector, " Separator ");
 
 }
 //----------------------------------------------------------------------------
@@ -383,14 +388,14 @@ void OLED_INI(void){
 //----------------------------------------------------------------------------
 void Soldering_Iron_INI(uint8_t Flash_Read_Status){
 
-	Soldering_Iron.PID.KP=5;
-	Soldering_Iron.PID.KI=0.05;//0.03
-	Soldering_Iron.PID.KD=1;
+	Soldering_Iron.PID.KP=Soldering_Iron_PID_KP;
+	Soldering_Iron.PID.KI=Soldering_Iron_PID_KI;
+	Soldering_Iron.PID.KD=Soldering_Iron_PID_KD;
 	Soldering_Iron.PID.dt=0.1;
 	Soldering_Iron.PID.MAX_Control=350;
 
 	Soldering_Iron.Filter.Filter_Mode=Nine_Samples;
-	Soldering_Iron.Filter.k_min=0.01;
+	Soldering_Iron.Filter.k_min=0.1;
 	Soldering_Iron.Filter.k_max=0.8;
 	Soldering_Iron.Filter.Val_Delata=30;
 	Soldering_Iron.Filter.mass=&ADC_Data[4];
@@ -411,38 +416,36 @@ void Soldering_Iron_INI(uint8_t Flash_Read_Status){
 
 	Soldering_Iron.MODE=MANUAL;
 
-	if(Flash_Read_Status!=HAL_OK){
-		Soldering_Iron.Temperature_Pressets.Manual=1200;
-		Soldering_Iron. Temperature_Pressets.Presset1=1000;
-		Soldering_Iron. Temperature_Pressets.Presset2=1500;
+	Soldering_Iron.Temperature_Converting.Coeff=Soldering_Iron_Temperature_Converting_Coeff;
 
-		Soldering_Iron.Add_Temperature=1000;
+	if(Flash_Read_Status!=HAL_OK){							//if Data was read incorrect from flash reinitialize all user parameters
+		Soldering_Iron.Temperature_Presets_C.Manual=100;
+		Soldering_Iron.Temperature_Presets_C.Preset1=150;
+		Soldering_Iron.Temperature_Presets_C.Preset2=300;
 
-		Soldering_Iron.Temperature_Pressets.Sleep=800;
+		Soldering_Iron.Temperature_Presets_C.Sleep=100;
 		Soldering_Iron.Sleep_time=200;
 		Soldering_Iron.Disable_time=400;
 
 		Soldering_Iron.Flash_Key=0x0801F802;
 	}
-	Solder_Iron_Flash_Read_Manual_Temperature(&Soldering_Iron);
+	Solder_Iron_Flash_Read_Manual_Temperature(&Soldering_Iron);	//read Last manual temperature
 	Solder_Iron_ini(&Soldering_Iron);
 }
 //----------------------------------------------------------------------------
 void PAC_INI(){
-	PAC.ZCD=&ZCD;
-
-	ZCD.EXTI_PIN=GPIO_PIN_1;
-	ZCD.GPIO=GPIOB;
-	ZCD_ini(&ZCD);
+	PAC.ZCD.EXTI_PIN=GPIO_PIN_1;
+	PAC.ZCD.GPIO=GPIOB;
+	PAC_ini(&PAC);
 
 }
 //----------------------------------------------------------------------------
 void Soldering_Heat_Gun_INI(uint8_t Flash_Read_Status){
-	Soldering_Heat_Gun.PID.KP=0.2;
-	Soldering_Heat_Gun.PID.KI=0.01;//0.03;//0.03
-	Soldering_Heat_Gun.PID.KD=0.4;//1.5;
+
+	Soldering_Heat_Gun.PID.KP=Soldering_Heat_Gun_PID_KP;
+	Soldering_Heat_Gun.PID.KI=Soldering_Heat_Gun_PID_KI;
+	Soldering_Heat_Gun.PID.KD=Soldering_Heat_Gun_PID_KD;
 	Soldering_Heat_Gun.PID.dt=0.1;
-	Soldering_Heat_Gun.PID.MAX_Control=350;
 
 
 	Soldering_Heat_Gun.Filter.Filter_Mode=Three_Samples;
@@ -470,15 +473,16 @@ void Soldering_Heat_Gun_INI(uint8_t Flash_Read_Status){
 
 	Soldering_Heat_Gun.PAC_Control->Control_Value=25;
 
+	Soldering_Heat_Gun.Temperature_Converting.Coeff=Soldering_Heat_Gun_Temperature_Converting_Coeff;
 
-	if(Flash_Read_Status!=HAL_OK){
-		Soldering_Heat_Gun.Temperature_Pressets.Presset1=1000;
-		Soldering_Heat_Gun.Temperature_Pressets.Presset2=1500;
-		Soldering_Heat_Gun.Temperature_Coolling=100;
+	if(Flash_Read_Status!=HAL_OK){									//if Data was read incorrect from flash reinitialize all user parameters
+		Soldering_Heat_Gun.Temperature_Presets_C.Preset1=100;
+		Soldering_Heat_Gun.Temperature_Presets_C.Preset2=200;
+		Soldering_Heat_Gun.Temperature_Coolling.C=50;
 		Soldering_Heat_Gun.Flash_Key=Soldering_Heat_Gun_Struct_Key;
 	}
 
-	Soldering_Heat_Gun_Flash_Read_Manual_Temperature(&Soldering_Heat_Gun);
+	Soldering_Heat_Gun_Flash_Read_Manual_Temperature(&Soldering_Heat_Gun); //read Last manual temperature
 
 	Soldering_Heat_Gun_ini(&Soldering_Heat_Gun);
 
@@ -488,11 +492,10 @@ void Soldering_Heat_Gun_INI(uint8_t Flash_Read_Status){
 }
 //----------------------------------------------------------------------------
 void Soldering_Separator_INI(uint8_t Flash_Read_Status){
-	Soldering_Separator.PID.KP=0.15;
-	Soldering_Separator.PID.KI=0.0005;//0.03;//0.03
-	Soldering_Separator.PID.KD=0.1;//1.5;
+	Soldering_Separator.PID.KP=Soldering_Separator_PID_KP;
+	Soldering_Separator.PID.KI=Soldering_Separator_PID_KI;
+	Soldering_Separator.PID.KD=Soldering_Separator_PID_KD;
 	Soldering_Separator.PID.dt=0.1;
-	Soldering_Separator.PID.MAX_Control=350;
 
 
 	Soldering_Separator.Filter.Filter_Mode=Three_Samples;
@@ -513,22 +516,19 @@ void Soldering_Separator_INI(uint8_t Flash_Read_Status){
 
 	Soldering_Separator.PAC_Control=PAC_Control_Vector_Create(&PAC, &element_ini);
 
-	Soldering_Separator.PAC_Control->Control_Value=25;
+	Soldering_Separator.Temperature_Converting.Coeff=Soldering_Separator_Temperature_Converting_Coeff;
 
-
-	if(Flash_Read_Status!=HAL_OK){
-		Soldering_Separator.Temperature_Pressets.Presset1=1000;
-		Soldering_Separator.Temperature_Pressets.Presset2=1500;
+	if(Flash_Read_Status!=HAL_OK){									//if Data was read incorrect from flash reinitialize all user parameters
+		Soldering_Separator.Temperature_Presets_C.Preset1=150;
+		Soldering_Separator.Temperature_Presets_C.Preset2=200;
 		Soldering_Separator.Flash_Key=Soldering_Separator_Struct_Key;
 	}
 
-	Soldering_Separator_Flash_Read_Manual_Temperature(&Soldering_Separator);
+	Soldering_Separator_Flash_Read_Manual_Temperature(&Soldering_Separator);	//read Last manual temperature
 
 	Soldering_Separator_ini(&Soldering_Separator);
 
 	Soldering_Separator_OFF(&Soldering_Separator);
-
-
 }
 //----------------------------------------------------------------------------
 
@@ -578,7 +578,7 @@ int main(void)
 
 
   BUTTON_INI();
-  INCODER_INI();
+  Encoder_INI();
   MENU_INI();
   OLED_INI();
   PAC_INI();
@@ -586,12 +586,8 @@ int main(void)
   Soldering_Heat_Gun_INI(Flash_Read_Status);
   Soldering_Separator_INI(Flash_Read_Status);
 
-  if(Flash_Read_Status!=HAL_OK)
-	  Soldering_Station_Write_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
-
-
-
-
+  if(Flash_Read_Status!=HAL_OK)							//if Struct was read incorrect
+	  Soldering_Station_Write_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);	//Rewrite all structures
 
   //---------------------------------------------------------------------------------TIM
 	__HAL_TIM_CLEAR_FLAG(&htim1, TIM_SR_UIF);
@@ -605,7 +601,6 @@ int main(void)
 	__HAL_TIM_CLEAR_FLAG(&htim4, TIM_SR_UIF);
 	HAL_TIM_Base_Start_IT(&htim4);
 
-    PID_Set_Point(&Soldering_Heat_Gun.PID, 2300);
   //---------------------------------------------------------------------------------
 
   /* USER CODE END 2 */
@@ -614,10 +609,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_Delay(100);
-
-
-	  Menu_it(&Menu_List_Vector, &Incoder_P1, &Incoder_P2);
+	  Face_UI_it(&Encoder_P1, &Encoder_P2, &Button_Vector);
+	  UI_Menu_it(&Menu_List_Vector, &Encoder_P2, &Button_Vector);
+	  Soldering_Station_Write_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);	//Write all struct in flash after changing in UI_Menu
 
     /* USER CODE END WHILE */
 
@@ -813,6 +807,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_14;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1146,14 +1141,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  /*Configure GPIO pins : PB1 PB14 PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_14|GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB12 PB14 PB3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_3;
+  /*Configure GPIO pin : PB12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);

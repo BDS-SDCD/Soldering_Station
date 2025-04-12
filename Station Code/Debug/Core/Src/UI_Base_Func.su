@@ -1,0 +1,10 @@
+../Core/Src/UI_Base_Func.c:3:6:UI_Draw_Parmetr_Ptr	32	static
+../Core/Src/UI_Base_Func.c:54:6:UI_Draw_Parmetr	16	static
+../Core/Src/UI_Base_Func.c:61:6:UI_Draw_String	16	static
+../Core/Src/UI_Base_Func.c:70:6:UI_Set_Cursor	16	static
+../Core/Src/UI_Base_Func.c:83:6:UI_Clear_Line	16	static
+../Core/Src/UI_Base_Func.c:90:6:UI_Change_Value_Ptr	24	static
+../Core/Src/UI_Base_Func.c:124:5:UI_Change_Value	32	static
+../Core/Src/UI_Base_Func.c:133:6:UI_Draw_String_Center	24	static
+../Core/Src/UI_Base_Func.c:143:6:UI_Encoder_Reset_Rotary_Switch_Buffer	16	static
+../Core/Src/UI_Base_Func.c:150:6:UI_Encoder_Reset_Button_State	16	static

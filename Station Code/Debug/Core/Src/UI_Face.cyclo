@@ -1,0 +1,4 @@
+../Core/Src/UI_Face.c:4:6:Face_UI_Draw_Name_List	1
+../Core/Src/UI_Face.c:36:6:Face_UI_Draw_Parameters_List	7
+../Core/Src/UI_Face.c:84:6:Get_Button_State	26
+../Core/Src/UI_Face.c:147:6:Face_UI_it	16
