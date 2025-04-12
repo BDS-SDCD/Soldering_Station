@@ -1,17 +1,17 @@
-This place is a message... and part of a system of messages... pay attention to it!
-Sending this message was important to us. We considered ourselves to be a powerful culture.
-This place is not a place of honor... no highly esteemed deed is commemorated here... nothing valued is here.
-What is here was dangerous and repulsive to us. This message is a warning about danger.
-The danger is in a particular location... it increases towards a center... the center of danger is here... of a particular size and shape, and below us.
-The danger is still present, in your time, as it was in ours.
-The danger is to the sanity, and it can cause madness.
-# main
+This place is a message... and part of a system of messages... pay attention to it!<br/>
+Sending this message was important to us. We considered ourselves to be a powerful culture.<br/>
+This place is not a place of honor... no highly esteemed deed is commemorated here... nothing valued is here.<br/>
+What is here was dangerous and repulsive to us. This message is a warning about danger.<br/>
+The danger is in a particular location... it increases towards a center... the center of danger is here... of a particular size and shape, and below us.<br/>
+The danger is still present, in your time, as it was in ours.<br/>
+The danger is to the sanity, and it can cause madness.<br/>
+# MAIN
 This project was developed for home made one layer PCB based on photoresist technology and using the element base that is already available.
 
 It was developed for the handle of the Hakko T12 soldering iron (needs to be modified according to the given scheme) Heat gun with the 8858 substation (~220 spiral 12V fan). Anything that can heat up from ~220 and has a thermocouple will do as a soldering separator. In my case, it is literally an iron.
 
-[Schematic](Station Schematic/Chematic PDF/Station.pdf)
-[Code](Station Code/Core)
+[Schematic](https://github.com/BDS-SDCD/Soldering_Station/tree/main/Station%20Schematic/Chematic%20PDF)<br/>
+[Code](https://github.com/BDS-SDCD/Soldering_Station/tree/main/Station%20Code/Core)<br/>
 ### Soldering iron
 
 The advantages include the fact that, unlike the original Chinese Hakko T12 controller, you will no longer be able to hear annoying clicks during heating, since here PWM is used to control the soldering iron. The PWM frequency is 24 kHz. Unlike the basic version of the soldering iron controller, it has the ability to press a button on the soldering iron to set the maximum temperature for heating massive soldering pads. The implementation of the button is the setting of the maximum temperature that the ADC can process. When implementing the supply of full power without regulation, it led me to several broken soldering tips.
@@ -29,7 +29,7 @@ An old iron is used as a soldering separator in this project. This is the only t
 
 Each of the devices has a set of settings. As a rule, when I’m working with a soldering station, I use only a few temperature settings, which are implemented here in adjustable temperature presets. Each of the presets has its own temperature correction value, which allows you to accurately adjust the temperature of each preset. Also, the manual control mode has a separate temperature correction value.
 
-In this project I did not provide the ability to configure important parameters such as the PID controller coefficient and the temperature conversion coefficient in the user interface. All this can be configured in the Soldering_Station.h file by changing the Define value. Also you can change Button mapping in this file. Everything else is configured inside the user interface.
+In this project I did not provide the ability to configure important parameters such as the PID controller coefficient and the temperature conversion coefficient in the user interface. All this can be configured in the [Soldering_Station.h](https://github.com/BDS-SDCD/Soldering_Station/blob/main/Station%20Code/Core/Inc/Soldering_Station.h) file by changing the Define value. Also you can change Button mapping in this file. Everything else is configured inside the user interface.
 
 All interfaces are symbolic.
 
