@@ -1,11 +1,4 @@
-# Disclaimer<br/>
-This place is a [message...](https://gwern.net/doc/technology/1993-trauth.pdf) and part of a system of messages... pay attention to it!<br/>
-Sending this message was important to us. We considered ourselves to be a powerful culture.<br/>
-This place is not a place of honor... no highly esteemed deed is commemorated here... nothing valued is here.<br/>
-What is here was dangerous and repulsive to us. This message is a warning about danger.<br/>
-The danger is in a particular location... it increases towards a center... the center of danger is here... of a particular size and shape, and below us.<br/>
-The danger is still present, in your time, as it was in ours.<br/>
-The danger is to the sanity, and it can cause madness.<br/>
+
 # MAIN
 
   This soldering station developed for the handle of the Hakko T12 soldering iron (needs to be modified according to the given scheme) Heat gun with the 8858 substation (~220 spiral 12V fan). Anything that can heat up from ~220 and has a thermocouple will do as a soldering separator. In my case, it is literally an iron. This project was developed for home made one layer PCB based on photoresist technology and using the element base that is already available.<br/>
