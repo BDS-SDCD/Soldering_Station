@@ -1178,12 +1178,6 @@
 		(uuid "617de5c9-fe38-4be1-afa3-ab2b78aa657b")
 	)
 	(junction
-		(at 101.6 78.74)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "7946d39d-b4b9-43df-82d4-9b357c434b41")
-	)
-	(junction
 		(at 140.335 48.26)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1326,16 +1320,6 @@
 			(type default)
 		)
 		(uuid "4a4aa9cd-6204-4b46-8cd1-61aadd827c1e")
-	)
-	(wire
-		(pts
-			(xy 109.855 78.74) (xy 109.855 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4bc816d1-a0ae-45ea-914d-9799be9f59db")
 	)
 	(wire
 		(pts
@@ -1499,23 +1483,13 @@
 	)
 	(wire
 		(pts
-			(xy 94.615 76.2) (xy 101.6 76.2)
+			(xy 93.98 76.2) (xy 101.6 76.2)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "9eb9a815-51d4-4484-85f4-ed9960da55bf")
-	)
-	(wire
-		(pts
-			(xy 101.6 78.74) (xy 109.855 78.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a0778b8e-b9e4-404d-a8f5-922a08c45a3a")
 	)
 	(wire
 		(pts
@@ -1546,16 +1520,6 @@
 			(type default)
 		)
 		(uuid "b441c4e6-26c7-473c-8524-6150998cd957")
-	)
-	(wire
-		(pts
-			(xy 101.6 50.8) (xy 109.855 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b5b60ac7-84b2-4e9a-99c5-b7a9d0db9a00")
 	)
 	(wire
 		(pts
@@ -1711,7 +1675,7 @@
 	)
 	(hierarchical_label "Vibration_Detection"
 		(shape input)
-		(at 95.25 68.58 180)
+		(at 95.25 83.82 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1879,7 +1843,7 @@
 	)
 	(hierarchical_label "Solder_Analog"
 		(shape input)
-		(at 95.25 71.12 180)
+		(at 95.25 68.58 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1975,7 +1939,7 @@
 	)
 	(hierarchical_label "ZCD"
 		(shape input)
-		(at 95.25 78.74 180)
+		(at 95.25 71.12 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2023,7 +1987,7 @@
 	)
 	(hierarchical_label "TABLE_Control+"
 		(shape output)
-		(at 94.615 76.2 180)
+		(at 95.25 73.66 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2035,7 +1999,7 @@
 	)
 	(hierarchical_label "TABLE_Analog"
 		(shape input)
-		(at 95.25 73.66 180)
+		(at 93.98 76.2 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2047,7 +2011,7 @@
 	)
 	(hierarchical_label "FAN_Control+"
 		(shape output)
-		(at 95.25 83.82 180)
+		(at 95.25 78.74 180)
 		(fields_autoplaced yes)
 		(effects
 			(font

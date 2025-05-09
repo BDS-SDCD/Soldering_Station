@@ -49,6 +49,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+DMA_HandleTypeDef hdma_tim3_ch1_trig;
 
 /* USER CODE BEGIN PV */
 //---------------------------------------------------------------------------------
@@ -57,12 +58,12 @@ struct Encoder Encoder_P2, Encoder_P1;
 struct Button_Vector Button_Vector;
 //struct Button  Full_Power_Button;
 struct Vibration_Sensor VS;
-struct Menu_List_Element_Vector Soldering_Iron_Menu_Vector, Soldering_Heat_Gun_Menu_Vector,Soldering_Separator_Menu_Vector;
+struct Menu_List_Element_Vector Soldering_Iron_Menu_Vector, Soldering_Heat_Gun_Menu_Vector, Soldering_Separator_Menu_Vector;
 struct Menu_List_Vector Menu_List_Vector;
 struct Soldering_Iron Soldering_Iron;
 struct Soldering_Heat_Gun Soldering_Heat_Gun;
 struct Soldering_Separator Soldering_Separator;
-struct PAC PAC;
+struct PAC *PAC;
 
 
 //---------------------------------------------------------------------------------
@@ -76,7 +77,6 @@ static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -88,11 +88,16 @@ uint16_t ADC_Data[17];
 /* USER CODE BEGIN 0 */
 //---------------------------------------------------------------------------------
 void PAC_ON_Callback(struct PAC *self){
+
 	/**
 	 * Set max MAX_Control_Value for all PID which controlling PAG
 	 */
 	Soldering_Heat_Gun_Set_PID_MAX_Control_Value(PAC_Get_Max_Control_Value(self), &Soldering_Heat_Gun);
 	Soldering_Separator_Set_PID_MAX_Control_Value(PAC_Get_Max_Control_Value(self), &Soldering_Separator);
+}
+//---------------------------------------------------------------------------------
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
+	PAC_IC_Capture_INT(PAC);
 }
 //--------------------------------------------------------------------------------- ADC_Callback
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
@@ -105,12 +110,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
 }
 //--------------------------------------------------------------------------------- EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
-
-	if(PAC_EXTI(&PAC,&GPIO_PIN)==0){					//if interrupt was from PAC's part(ZCD) skip all another checks
 		Button_Vector_EXTI(&Button_Vector,&GPIO_PIN);
 		Encoder_EXTI(&Encoder_P2, &GPIO_PIN);
 		Encoder_EXTI(&Encoder_P1, &GPIO_PIN);
-	}
 }
 //---------------------------------------------------------------------------------TIM_Callback
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
@@ -129,13 +131,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
         		prescaler=1;
         	}
         }else if(htim->Instance == TIM3){																	//Service  TIM3
+
+        }else if(htim->Instance == TIM4){						//Timer only for PAC
+        	//PAC_it(&PAC);
         	Flash_Rewrite_Timer_tim_it(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
         	Solder_Iron_tim_it(&Soldering_Iron);
         	Button_Vector_it(&Button_Vector);
         	Encoder_it(&Encoder_P1);
         	Encoder_it(&Encoder_P2);
-        }else if(htim->Instance == TIM4){						//Timer only for PAC
-        	PAC_it(&PAC);
         }
 }
 //--------------------------------------------------------------------------------- INI Blocks
@@ -409,8 +412,8 @@ void Soldering_Iron_INI(uint8_t Flash_Read_Status){
 	Soldering_Iron.Full_Power_Button.GPIO=GPIOA;
 	Soldering_Iron.Full_Power_Button.MODE=Button_Mode_Regular_Without_EXTI;
 
-	Soldering_Iron.VS.EXTI_PIN=GPIO_PIN_5;
-	Soldering_Iron.VS.GPIO=GPIOA;
+	Soldering_Iron.VS.EXTI_PIN=GPIO_PIN_11;
+	Soldering_Iron.VS.GPIO=GPIOB;
 	Soldering_Iron.VS.State=3;
 	Soldering_Iron.VS.Prew_State=4;
 
@@ -434,9 +437,16 @@ void Soldering_Iron_INI(uint8_t Flash_Read_Status){
 }
 //----------------------------------------------------------------------------
 void PAC_INI(){
-	PAC.ZCD.EXTI_PIN=GPIO_PIN_1;
-	PAC.ZCD.GPIO=GPIOB;
-	PAC_ini(&PAC);
+	struct PAC_Init PAC_ini;
+
+	PAC_ini.DMA = &hdma_tim3_ch1_trig;
+	PAC_ini.DMA_Chanel = DMA1_Channel6;
+	PAC_ini.TIM_Instance = TIM3;
+	PAC_ini.IC_Trigger_Channel_GPIO = GPIOA;
+	PAC_ini.IC_Trigger_Channel_PIN = GPIO_PIN_6;
+	PAC_ini.TIM_CHANNEL=TIM_CHANNEL_1;
+
+	PAC = PAC_Base_Create(&PAC_ini);
 
 }
 //----------------------------------------------------------------------------
@@ -462,16 +472,16 @@ void Soldering_Heat_Gun_INI(uint8_t Flash_Read_Status){
 	Soldering_Heat_Gun.MANUAL_PIN=GPIO_PIN_9;
 	Soldering_Heat_Gun.MANUAL_GPIO=GPIOB;
 
-	Soldering_Heat_Gun.PAC = &PAC;
+	Soldering_Heat_Gun.PAC = PAC;
 
-	struct PAC_Control_Vector element_ini;
+	struct PAC_Devices_Control_Init element_ini;
 
-	element_ini.GPIO=GPIOB;
-	element_ini.PIN=GPIO_PIN_11;
+	element_ini.Channel_GPIO = GPIOB;
+	element_ini.Channel_PIN = GPIO_PIN_1;
+	element_ini.TIM_CHANNEL = TIM_CHANNEL_4;
 
-	Soldering_Heat_Gun.PAC_Control=PAC_Control_Vector_Create(&PAC, &element_ini);
+	Soldering_Heat_Gun.PAC_Control = PAC_Devise_Control_Create(PAC, &element_ini);
 
-	Soldering_Heat_Gun.PAC_Control->Control_Value=25;
 
 	Soldering_Heat_Gun.Temperature_Converting.Coeff=Soldering_Heat_Gun_Temperature_Converting_Coeff;
 
@@ -507,14 +517,15 @@ void Soldering_Separator_INI(uint8_t Flash_Read_Status){
 
 	Soldering_Separator.MODE=MANUAL;
 
-	Soldering_Separator.PAC = &PAC;
+	Soldering_Separator.PAC = PAC;
 
-	struct PAC_Control_Vector element_ini;
+	struct PAC_Devices_Control_Init element_ini;
 
-	element_ini.GPIO=GPIOB;
-	element_ini.PIN=GPIO_PIN_0;
+	element_ini.Channel_GPIO = GPIOA;
+	element_ini.Channel_PIN = GPIO_PIN_7;
+	element_ini.TIM_CHANNEL = TIM_CHANNEL_2;
 
-	Soldering_Separator.PAC_Control=PAC_Control_Vector_Create(&PAC, &element_ini);
+	Soldering_Separator.PAC_Control = PAC_Devise_Control_Create(PAC, &element_ini);
 
 	Soldering_Separator.Temperature_Converting.Coeff=Soldering_Separator_Temperature_Converting_Coeff;
 
@@ -567,14 +578,13 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
-  MX_TIM3_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   //---------------------------------------------------------------------------------
   uint8_t Flash_Read_Status;
 
-  Flash_Read_Status=Soldering_Station_Read_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
+  Flash_Read_Status = Soldering_Station_Read_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);
 
 
   BUTTON_INI();
@@ -595,13 +605,13 @@ int main(void)
 	__HAL_TIM_CLEAR_FLAG(&htim2, TIM_SR_UIF);
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
-	__HAL_TIM_CLEAR_FLAG(&htim3, TIM_SR_UIF);
-	HAL_TIM_Base_Start_IT(&htim3);
 
 	__HAL_TIM_CLEAR_FLAG(&htim4, TIM_SR_UIF);
 	HAL_TIM_Base_Start_IT(&htim4);
 
   //---------------------------------------------------------------------------------
+
+
 
   /* USER CODE END 2 */
 
@@ -609,6 +619,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  Face_UI_it(&Encoder_P1, &Encoder_P2, &Button_Vector);
 	  UI_Menu_it(&Menu_List_Vector, &Encoder_P2, &Button_Vector);
 	  Soldering_Station_Write_Struct(&Soldering_Iron, &Soldering_Heat_Gun, &Soldering_Separator);	//Write all struct in flash after changing in UI_Menu
@@ -633,9 +644,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -646,7 +656,7 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
@@ -732,7 +742,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -805,7 +815,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_14;
   sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -974,51 +984,6 @@ static void MX_TIM2_Init(void)
 }
 
 /**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 799;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 499;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
   * @brief TIM4 Initialization Function
   * @param None
   * @retval None
@@ -1037,9 +1002,9 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 79;
+  htim4.Init.Prescaler = 799;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 9;
+  htim4.Init.Period = 499;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -1076,6 +1041,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 
 }
 
@@ -1100,7 +1068,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10|GPIO_PIN_9, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PC13 PC14 */
   GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14;
@@ -1115,8 +1083,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA1 PA6 PA7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7;
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -1126,24 +1094,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA4 PA5 PA8 PA9
-                           PA10 PA12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_8|GPIO_PIN_9
-                          |GPIO_PIN_10|GPIO_PIN_12;
+  /*Configure GPIO pins : PA4 PA8 PA9 PA10
+                           PA11 PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10
+                          |GPIO_PIN_11|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB0 PB10 PB11 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_9;
+  /*Configure GPIO pins : PB10 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB1 PB14 PB3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_14|GPIO_PIN_3;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  /*Configure GPIO pin : PB11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -1161,11 +1129,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA11 */
-  GPIO_InitStruct.Pin = GPIO_PIN_11;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : PB14 PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
@@ -1174,9 +1142,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI1_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-
   HAL_NVIC_SetPriority(EXTI2_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
@@ -1187,6 +1152,24 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+	GPIO_InitStruct.Pin = GPIO_PIN_6;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+
+	GPIO_InitStruct.Pin = GPIO_PIN_1;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
 /* USER CODE END MX_GPIO_Init_2 */
 }
 

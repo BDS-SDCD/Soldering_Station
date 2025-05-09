@@ -350,8 +350,8 @@ void Soldering_Heat_Gun_ON(struct Soldering_Heat_Gun *self){
 	/**
 	 * Turn ON Heat Gun
 	 */
-	PAC_ON(self->PAC);							//Turn ON Phase Angle Control
-	self->PAC_Control->State=PAC_Control_ON;	//Turn ON Control value for Phase Angle Control
+
+	PAC_Device_Control_ON(self->PAC_Control);	//Turn ON Phase Angle Control
 	PID_ini(&self->PID);						//Reset PID
 	Filter_ini(&self->Filter);					//Reset Filter
 
@@ -367,10 +367,8 @@ void Soldering_Heat_Gun_OFF(struct Soldering_Heat_Gun *self){
 	 */
 	Soldering_Heat_Gun_Temperature_Coolling_Converting(self);
 	self->State=Heat_Gun_COOLING;					//Set COOLING State. It needs to cool heat gun to Temperature_Coolling. After set Turn OFF state
-	self->PAC_Control->State=PAC_Control_OFF;		//Turn OFF Control value for Phase Angle Control
-	PAC_OFF(self->PAC);								// Turn OFF Phase Angle Control
-	HAL_GPIO_WritePin(self->PAC_Control->GPIO, self->PAC_Control->PIN, GPIO_PIN_RESET); //Turn ON Full Speed FAN rotation
-	HAL_GPIO_WritePin(self->MANUAL_GPIO, self->MANUAL_PIN, GPIO_PIN_RESET);
+	PAC_Device_Control_OFF(self->PAC_Control);											// Turn OFF Phase Angle Control
+	HAL_GPIO_WritePin(self->MANUAL_GPIO, self->MANUAL_PIN, GPIO_PIN_RESET);	 	//Turn ON Full Speed FAN rotation
 }
 //---------------------------------------------------------------------------------
 void Soldering_Heat_Gun_Set_MODE_Temperature(struct Soldering_Heat_Gun *self,enum MODE MODE){
@@ -459,18 +457,18 @@ uint16_t Soldering_Heat_Gun_Get_Current_Temperature_C(struct Soldering_Heat_Gun 
 	return Get_Current_Temperature_C(&self->Temperature_Converting);
 }
 //---------------------------------------------------------------------------------
-enum PAC_Control_State Soldering_Heat_Gun_Get_PAC_Controll_State(struct Soldering_Heat_Gun *self){
+enum PAC_Device_Control_State Soldering_Heat_Gun_Get_PAC_Controll_State(struct Soldering_Heat_Gun *self){
 	/**
 	 * return  Soldering_Heat_Gun_Get_PAC_Controll_State(PAC_Control_OFF PAC_Control_ON)
 	 */
-	return self->PAC_Control->State;
+	return PAC_Device_Control_Get_State(self->PAC_Control);
 }
 //---------------------------------------------------------------------------------
 uint16_t Soldering_Heat_Gun_Get_PAC_Controll_Value(struct Soldering_Heat_Gun *self){
 	/**
 	 * return Soldering_Heat_Gun PAC's control value
 	 */
-	return self->PAC_Control->Control_Value;
+	return PAC_Device_Control_Get_Control_Value(self->PAC_Control);
 }
 //---------------------------------------------------------------------------------
 void Soldering_Heat_Gun_it(struct Soldering_Heat_Gun *self){
@@ -481,7 +479,7 @@ void Soldering_Heat_Gun_it(struct Soldering_Heat_Gun *self){
 	if(self->State==Heat_Gun_ON&&PAC_Get_State(self->PAC)==ZCD_STATE_ON){									//if Heat GUN turn ON && ZCD ON
 		PID_Set_Curent_Point(&self->PID,(int)Temperatur_Correction(Filter_Combined(&self->Filter), &self->Temperature_Converting, &self->Temperature_Corection_ADC, &self->MODE));
 																										//Filter and set current Temperature and Heat_Gun PID IT
-		PAC_Set_Control_Value((uint16_t)PID_it(&self->PID), self->PAC_Control);							//Set PAC control value
+		PAC_Device_Control_Set_Control_Value(self->PAC_Control, (uint16_t)PID_it(&self->PID));							//Set PAC control value
 	}else if(self->State==Heat_Gun_COOLING){															//if Heat GUN Cooling
 		if(Temperatur_Correction(Filter_Combined(&self->Filter), &self->Temperature_Converting, &self->Temperature_Corection_C, &self->MODE)<=self->Temperature_Coolling.ADC){	//and set current Temperature											//if the current temperature is less than  Temperature_Coolling
 			self->State=Heat_Gun_OFF;																	//Turn off heat gun
@@ -544,8 +542,7 @@ void Soldering_Separator_ON(struct Soldering_Separator *self){
 	/**
 	 * Turn ON Soldering_Separator
 	 */
-	PAC_ON(self->PAC);								//Turn ON Phase Angle Control
-	self->PAC_Control->State=PAC_Control_ON;		//Turn ON Control value for Phase Angle Control
+	PAC_Device_Control_ON(self->PAC_Control);				//Turn ON Phase Angle Control
 	PID_ini(&self->PID);							//Reset PID
 	Filter_ini(&self->Filter);						//Reset Filter
 	self->State=Separator_ON;						//Set Turn ON State
@@ -555,8 +552,7 @@ void Soldering_Separator_OFF(struct Soldering_Separator *self){
 	/**
 	 * Turn OFF Soldering Separator
 	 */
-	self->PAC_Control->State=PAC_Control_OFF; 		//Turn OFF Control value for Phase Angle Control
-	PAC_OFF(self->PAC);								// Turn OFF Phase Angle Control
+	PAC_Device_Control_OFF(self->PAC_Control); 				// Turn OFF Phase Angle Control
 	self->State=Separator_OFF;						// Set Soldering_Separator Turn OFF State
 }
 //---------------------------------------------------------------------------------
@@ -639,18 +635,18 @@ void Soldering_Separator_Set_PID_MAX_Control_Value(uint16_t MAX_Control_Value, s
 	PID_Set_MAX_Control(MAX_Control_Value, &self->PID);
 }
 //---------------------------------------------------------------------------------
-enum PAC_Control_State Soldering_Separator_Get_PAC_Controll_State(struct Soldering_Separator *self){
+enum PAC_Device_Control_State Soldering_Separator_Get_PAC_Controll_State(struct Soldering_Separator *self){
 	/**
 	 * return  Soldering_Heat_Gun_Get_PAC_Controll_State(PAC_Control_OFF PAC_Control_ON)
 	 */
-	return self->PAC_Control->State;
+	return PAC_Device_Control_Get_State(self->PAC_Control);
 }
 //---------------------------------------------------------------------------------
 uint16_t Soldering_Separator_Get_PAC_Controll_Value(struct Soldering_Separator *self){
 	/**
 	 * return Soldering_Separator PAC's control value
 	 */
-	return self->PAC_Control->Control_Value;
+	return PAC_Device_Control_Get_Control_Value(self->PAC_Control);
 }
 //---------------------------------------------------------------------------------
 void Soldering_Separator_it(struct Soldering_Separator *self){
@@ -661,7 +657,7 @@ void Soldering_Separator_it(struct Soldering_Separator *self){
 	if(self->State==Separator_ON&&PAC_Get_State(self->PAC)==ZCD_STATE_ON){				//if Heat Soldering_Separator turn ON && ZCD ON
 		PID_Set_Curent_Point(&self->PID,(int)Temperatur_Correction(Filter_Combined(&self->Filter), &self->Temperature_Converting, &self->Temperature_Corection_ADC, &self->MODE));
 																						//Filter and set current Temperature and Soldering_Separator PID IT;
-		PAC_Set_Control_Value((uint16_t)PID_it(&self->PID), self->PAC_Control);			//Set PAC control value
+		PAC_Device_Control_Set_Control_Value(self->PAC_Control, (uint16_t)PID_it(&self->PID));			//Set PAC control value
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------------------// Soldering_Separator Flash

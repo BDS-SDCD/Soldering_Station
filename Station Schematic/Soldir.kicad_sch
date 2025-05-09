@@ -3493,6 +3493,12 @@
 		(uuid "420926e6-cd2a-4b23-a97f-663ac2d8842d")
 	)
 	(junction
+		(at 125.73 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4cc0a80c-59b8-4af1-a515-2f31407f494d")
+	)
+	(junction
 		(at 73.66 48.26)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3571,12 +3577,6 @@
 		(uuid "c636d7c4-5c08-4b66-984e-43ff8a65b264")
 	)
 	(junction
-		(at 121.92 58.42)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "cd2efe33-b5a5-410b-a8a1-133412729a1b")
-	)
-	(junction
 		(at 151.13 49.53)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3595,10 +3595,26 @@
 		(uuid "e0cc0c5a-3170-4374-b6cf-f1e19e766f75")
 	)
 	(junction
+		(at 115.57 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f79c7191-6375-41b0-a5d1-942b2df4ee84")
+	)
+	(junction
 		(at 179.07 38.1)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f9b5a7d0-a140-4c61-983b-a135fc6a8e3e")
+	)
+	(wire
+		(pts
+			(xy 115.57 67.31) (xy 115.57 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00250beb-ffbd-417a-b0bc-da874c1a0b29")
 	)
 	(wire
 		(pts
@@ -3639,6 +3655,36 @@
 			(type default)
 		)
 		(uuid "04a142c4-d294-4cd2-8946-23b172c4c489")
+	)
+	(wire
+		(pts
+			(xy 114.3 58.42) (xy 115.57 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "07f0d51d-2854-46f4-bc87-458cc5757f2a")
+	)
+	(wire
+		(pts
+			(xy 115.57 58.42) (xy 115.57 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a08bcc9-6459-472c-a8fa-435aaa80a284")
+	)
+	(wire
+		(pts
+			(xy 124.46 58.42) (xy 125.73 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0c87c003-6b57-409a-a297-176145685fa6")
 	)
 	(wire
 		(pts
@@ -4092,6 +4138,16 @@
 	)
 	(wire
 		(pts
+			(xy 125.73 57.15) (xy 125.73 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6110e5c9-07aa-4920-9ecc-af794213f950")
+	)
+	(wire
+		(pts
 			(xy 29.21 85.09) (xy 33.02 85.09)
 		)
 		(stroke
@@ -4222,16 +4278,6 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 58.42) (xy 133.35 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7bc47f80-266c-4d6f-8880-05aeaa38a215")
-	)
-	(wire
-		(pts
 			(xy 234.95 33.02) (xy 238.76 33.02)
 		)
 		(stroke
@@ -4269,16 +4315,6 @@
 			(type default)
 		)
 		(uuid "848ac9c2-2155-498c-962c-9b6e9b9f0f17")
-	)
-	(wire
-		(pts
-			(xy 121.92 67.31) (xy 121.92 69.85)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "87586c1f-1db1-4aad-adc2-eb2ac6d90cfa")
 	)
 	(wire
 		(pts
@@ -4432,16 +4468,6 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 58.42) (xy 121.92 59.69)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ab500a91-a6a6-460d-93e9-87e0a0b3e4d2")
-	)
-	(wire
-		(pts
 			(xy 256.54 25.4) (xy 256.54 27.94)
 		)
 		(stroke
@@ -4449,6 +4475,16 @@
 			(type default)
 		)
 		(uuid "abb2ae77-b9c4-43b0-b188-bbb7c31ab7ce")
+	)
+	(wire
+		(pts
+			(xy 125.73 46.99) (xy 125.73 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "af71454a-43c3-4be5-9c3a-6676d42b0aa7")
 	)
 	(wire
 		(pts
@@ -4489,16 +4525,6 @@
 			(type default)
 		)
 		(uuid "be3e9aa3-a145-4849-a595-be1a2f075840")
-	)
-	(wire
-		(pts
-			(xy 121.92 48.26) (xy 121.92 49.53)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c3546a62-0e4d-480b-8f6b-a85d53d54f4d")
 	)
 	(wire
 		(pts
@@ -4552,6 +4578,16 @@
 	)
 	(wire
 		(pts
+			(xy 115.57 58.42) (xy 116.84 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ccd17bac-9b9f-4005-a9f2-26c6f6a0235e")
+	)
+	(wire
+		(pts
 			(xy 102.87 101.6) (xy 105.41 101.6)
 		)
 		(stroke
@@ -4589,16 +4625,6 @@
 			(type default)
 		)
 		(uuid "d083c596-734a-456d-a41a-8df0873bf565")
-	)
-	(wire
-		(pts
-			(xy 116.84 58.42) (xy 121.92 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d49e9943-5867-410e-a85e-55968b86f469")
 	)
 	(wire
 		(pts
@@ -4702,6 +4728,16 @@
 	)
 	(wire
 		(pts
+			(xy 125.73 58.42) (xy 133.35 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "edb209bd-d21a-436b-a73d-55b644c86d9b")
+	)
+	(wire
+		(pts
 			(xy 142.24 87.63) (xy 144.78 87.63)
 		)
 		(stroke
@@ -4762,16 +4798,6 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 57.15) (xy 121.92 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fed90740-8962-4218-8c16-926cd0e9607a")
-	)
-	(wire
-		(pts
 			(xy 223.52 33.02) (xy 234.95 33.02)
 		)
 		(stroke
@@ -4782,7 +4808,7 @@
 	)
 	(hierarchical_label "Vibratin_detector"
 		(shape output)
-		(at 116.84 58.42 180)
+		(at 114.3 58.42 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6037,7 +6063,7 @@
 	(symbol
 		(lib_name "+3V3_1")
 		(lib_id "power:+3V3")
-		(at 121.92 48.26 0)
+		(at 125.73 46.99 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6046,7 +6072,7 @@
 		(fields_autoplaced yes)
 		(uuid "3cda09dc-62a1-4826-8696-24032edc63db")
 		(property "Reference" "#PWR040"
-			(at 121.92 52.07 0)
+			(at 125.73 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6055,7 +6081,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 121.92 43.18 0)
+			(at 125.73 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6063,7 +6089,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 121.92 48.26 0)
+			(at 125.73 46.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6072,7 +6098,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 121.92 48.26 0)
+			(at 125.73 46.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6081,7 +6107,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 121.92 48.26 0)
+			(at 125.73 46.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6528,7 +6554,7 @@
 	)
 	(symbol
 		(lib_id "Diode:BAT54J")
-		(at 121.92 63.5 270)
+		(at 115.57 63.5 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6537,7 +6563,7 @@
 		(fields_autoplaced yes)
 		(uuid "4bb1b7fc-373a-4b7b-a501-ab98b43cc593")
 		(property "Reference" "D26"
-			(at 124.46 61.9124 90)
+			(at 118.11 61.9124 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6546,7 +6572,7 @@
 			)
 		)
 		(property "Value" "BAT54J"
-			(at 124.46 64.4524 90)
+			(at 118.11 64.4524 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6555,7 +6581,7 @@
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SOD-323F"
-			(at 117.475 63.5 0)
+			(at 111.125 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6564,7 +6590,7 @@
 			)
 		)
 		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/BAT54J.pdf"
-			(at 121.92 63.5 0)
+			(at 115.57 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6573,7 +6599,7 @@
 			)
 		)
 		(property "Description" "30V 200mA Schottky diode, SOD-323F"
-			(at 121.92 63.5 0)
+			(at 115.57 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7788,7 +7814,7 @@
 	(symbol
 		(lib_name "GND_2")
 		(lib_id "power:GND")
-		(at 121.92 69.85 0)
+		(at 115.57 69.85 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7797,7 +7823,7 @@
 		(fields_autoplaced yes)
 		(uuid "acabefd3-a85d-4b6c-8426-21ae6c276cd7")
 		(property "Reference" "#PWR069"
-			(at 121.92 76.2 0)
+			(at 115.57 76.2 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7806,7 +7832,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 121.92 74.93 0)
+			(at 115.57 74.93 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7814,7 +7840,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 121.92 69.85 0)
+			(at 115.57 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7823,7 +7849,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 121.92 69.85 0)
+			(at 115.57 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7832,7 +7858,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 121.92 69.85 0)
+			(at 115.57 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8255,6 +8281,74 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 120.65 58.42 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c44787d5-6163-4712-8053-907d902aa370")
+		(property "Reference" "R100"
+			(at 120.65 52.07 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 120.65 54.61 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Den_Castom_lib:R0 16.128"
+			(at 120.65 60.198 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 120.65 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 120.65 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c6040653-abc7-48a7-83e5-12b77b8e3e1e")
+		)
+		(pin "2"
+			(uuid "ec9835c5-1659-4a6f-8812-b7c9e9c2f3f8")
+		)
+		(instances
+			(project "Station"
+				(path "/246120ff-a993-4ec9-9427-16a3edd6008f/24bfc0bb-f777-4abc-bcaa-99ab6250b73a"
+					(reference "R100")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
 		(at 219.71 62.23 0)
 		(unit 1)
@@ -8610,7 +8704,7 @@
 	)
 	(symbol
 		(lib_id "Diode:BAT54J")
-		(at 121.92 53.34 270)
+		(at 125.73 53.34 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8619,7 +8713,7 @@
 		(fields_autoplaced yes)
 		(uuid "e5f9f48e-aca7-45c3-9c23-f30703535a81")
 		(property "Reference" "D9"
-			(at 124.46 51.7524 90)
+			(at 128.27 51.7524 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8628,7 +8722,7 @@
 			)
 		)
 		(property "Value" "BAT54J"
-			(at 124.46 54.2924 90)
+			(at 128.27 54.2924 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8637,7 +8731,7 @@
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SOD-323F"
-			(at 117.475 53.34 0)
+			(at 121.285 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8646,7 +8740,7 @@
 			)
 		)
 		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/BAT54J.pdf"
-			(at 121.92 53.34 0)
+			(at 125.73 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8655,7 +8749,7 @@
 			)
 		)
 		(property "Description" "30V 200mA Schottky diode, SOD-323F"
-			(at 121.92 53.34 0)
+			(at 125.73 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)

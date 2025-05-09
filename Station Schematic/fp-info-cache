@@ -1,4 +1,4 @@
-23350038072304474
+23351784871833060
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -53843,6 +53843,13 @@ Micro Switch horizontal R
 0
 3
 3
+Den_Castom_lib
+R0 16.128
+
+
+0
+0
+0
 Den_Castom_lib
 SW_SPDT_PCM12M
 

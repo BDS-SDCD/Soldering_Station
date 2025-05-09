@@ -44,14 +44,14 @@ void Face_UI_Draw_Parameters_List(){
 	UI_Draw_Parmetr(Solder_Iron_Get_Full_Power_State(&Soldering_Iron), 6, 4, BOOL);
 
 							//Draw Phase Angle Control Parameters
-	if(PAC_Get_State(&PAC)==ZCD_STATE_ON){
-		UI_Draw_Parmetr(PAC_Get_Frequency(&PAC), 6, 5, UINT8);
-		UI_Draw_Parmetr(PAC_Get_Max_Control_Value(&PAC), 6, 6, UINT16);
-		if(Soldering_Heat_Gun_Get_PAC_Controll_State(&Soldering_Heat_Gun)==PAC_Control_ON)
+	if(PAC_Get_State(PAC)==ZCD_STATE_ON){
+		UI_Draw_Parmetr(PAC_Get_Frequency(PAC), 6, 5, UINT8);
+		UI_Draw_Parmetr(PAC_Get_Max_Control_Value(PAC), 6, 6, UINT16);
+		if(Soldering_Heat_Gun_Get_PAC_Controll_State(&Soldering_Heat_Gun)==PAC_Device_ON)
 			UI_Draw_Parmetr(Soldering_Heat_Gun_Get_PAC_Controll_Value(&Soldering_Heat_Gun), 1, 7, UINT16);
 		else
 			UI_Draw_String("----",1,7,Direct_Display_MODE);
-		if(Soldering_Separator_Get_PAC_Controll_State(&Soldering_Separator)==PAC_Control_ON)
+		if(Soldering_Separator_Get_PAC_Controll_State(&Soldering_Separator)==PAC_Device_ON)
 			UI_Draw_Parmetr(Soldering_Separator_Get_PAC_Controll_Value(&Soldering_Separator), 6, 7, UINT16);
 		else
 			UI_Draw_String("----",6,7,Direct_Display_MODE);

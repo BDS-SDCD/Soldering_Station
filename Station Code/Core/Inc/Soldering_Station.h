@@ -166,7 +166,7 @@ struct Soldering_Heat_Gun {
 	struct Temperature_Converting Temperature_Converting;
 	struct Temperature_Corection Temperature_Corection_C;
 	struct Temperature_Corection Temperature_Corection_ADC;
-	struct PAC_Control_Vector *PAC_Control;
+	struct PAC_Devices_Control_Vector *PAC_Control;
 	struct PAC *PAC;
 
 	uint16_t OFF_PIN;
@@ -199,7 +199,7 @@ struct Soldering_Separator {
 	struct Temperature_Converting Temperature_Converting;
 	struct Temperature_Corection Temperature_Corection_C;
 	struct Temperature_Corection Temperature_Corection_ADC;
-	struct PAC_Control_Vector *PAC_Control;
+	struct PAC_Devices_Control_Vector *PAC_Control;
 	struct PAC *PAC;
 
 	enum Soldering_Separator_State{
@@ -244,7 +244,7 @@ enum Soldering_Heat_Gun_State Soldering_Heat_Gun_Get_State(struct Soldering_Heat
 uint16_t Soldering_Heat_Gun_Get_Temperature_Set_C(struct Soldering_Heat_Gun *self);
 uint16_t Soldering_Heat_Gun_Get_Current_Temperature_C(struct Soldering_Heat_Gun *self);
 uint16_t Soldering_Heat_Gun_Get_Manual_Preset_Temperature_C(struct Soldering_Heat_Gun *self);
-enum PAC_Control_State Soldering_Heat_Gun_Get_PAC_Controll_State(struct Soldering_Heat_Gun *self);
+enum PAC_Device_Control_State Soldering_Heat_Gun_Get_PAC_Controll_State(struct Soldering_Heat_Gun *self);
 uint16_t Soldering_Heat_Gun_Get_PAC_Controll_Value(struct Soldering_Heat_Gun *self);
 void Soldering_Heat_Gun_it(struct Soldering_Heat_Gun *self);
 HAL_StatusTypeDef Soldering_Heat_Gun_Flash_Read_Manual_Temperature(struct Soldering_Heat_Gun *self);
@@ -262,7 +262,7 @@ enum Soldering_Separator_State Soldering_Separator_Get_State(struct Soldering_Se
 uint16_t Soldering_Separator_Get_Temperature_Set_C(struct Soldering_Separator *self);
 uint16_t Soldering_Separator_Get_Current_Temperature_C(struct Soldering_Separator *self);
 uint16_t Soldering_Separator_Get_Manual_Preset_Temperature_C(struct Soldering_Separator *self);
-enum PAC_Control_State Soldering_Separator_Get_PAC_Controll_State(struct Soldering_Separator *self);
+enum PAC_Device_Control_State Soldering_Separator_Get_PAC_Controll_State(struct Soldering_Separator *self);
 uint16_t Soldering_Separator_Get_PAC_Controll_Value(struct Soldering_Separator *self);
 void Soldering_Separator_it(struct Soldering_Separator *self);
 HAL_StatusTypeDef Soldering_Separator_Flash_Read_Manual_Temperature(struct Soldering_Separator *self);
