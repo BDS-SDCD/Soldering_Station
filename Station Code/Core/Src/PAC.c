@@ -270,7 +270,14 @@ void PAC_IC_Capture_INT(struct PAC *self){
 
 	if(self->ZCD.TIM_MAX_Count != 0){
 
-		self->ZCD.Frequency = self->ZCD.TIM_MAX_Count / 2;
+		//self->ZCD.Frequency = self->ZCD.TIM_MAX_Count / 2;
+		if(self->ZCD.tim->Instance == TIM3){
+			self->ZCD.Frequency = HAL_RCC_GetPCLK1Freq() / (self->ZCD.tim->Instance->PSC+1);
+		}
+		else if(self->ZCD.tim->Instance == TIM1)
+			self->ZCD.Frequency = HAL_RCC_GetPCLK2Freq() / (self->ZCD.tim->Instance->PSC+1);
+
+		self->ZCD.Frequency = self->ZCD.Frequency / self->ZCD.TIM_MAX_Count;
 
 		self->ZCD.TIM_MAX_Count*=KOEF;
 
